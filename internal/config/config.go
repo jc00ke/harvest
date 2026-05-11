@@ -15,18 +15,28 @@ type Config struct {
 }
 
 type HarvestConfig struct {
-	AccountID   string `toml:"account_id"`
-	AccessToken string `toml:"access_token"`
+	AccountID   string `toml:"account_id" json:"account_id"`
+	AccessToken string `toml:"access_token" json:"access_token"`
 }
 
+// Load returns Harvest credentials, preferring the OS keyring and falling back
+// to the TOML config file if the keyring has no entry (or is unavailable).
 func Load() (*Config, error) {
+	if cfg, err := LoadFromKeyring(); err == nil {
+		return cfg, nil
+	}
+	return LoadFromFile()
+}
+
+// LoadFromFile reads credentials from the TOML config file at ~/.config/harvest-tui/config.toml.
+func LoadFromFile() (*Config, error) {
 	configPath, err := getConfigPath()
 	if err != nil {
 		return nil, fmt.Errorf("could not determine config path: %w", err)
 	}
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("could not load config file. Create %s with your Harvest credentials.\n\nTo get started, set up your Harvest API credentials:\n%s", configPath, SetupInstructionsURL)
+		return nil, fmt.Errorf("could not load credentials. Run `harvest-cli auth login` to store credentials in your OS keyring, or create %s with your Harvest credentials.\n\nTo get started, set up your Harvest API credentials:\n%s", configPath, SetupInstructionsURL)
 	}
 
 	var config Config
@@ -49,6 +59,11 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("access_token is required.\n\nTo get started, set up your Harvest API credentials:\n%s", SetupInstructionsURL)
 	}
 	return nil
+}
+
+// ConfigFilePath returns the location of the TOML config file.
+func ConfigFilePath() (string, error) {
+	return getConfigPath()
 }
 
 func getConfigPath() (string, error) {
