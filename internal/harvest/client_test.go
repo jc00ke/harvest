@@ -611,7 +611,7 @@ func TestFetchTimeEntries(t *testing.T) {
 		client.SetBaseURL(server.URL)
 		client.SetUserID(123) // Set user ID for testing
 
-		entries, err := client.FetchTimeEntries("2025-01-15")
+		entries, err := client.FetchTimeEntries("2025-01-15", "2025-01-15")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -672,7 +672,7 @@ func TestFetchTimeEntries(t *testing.T) {
 		client.SetBaseURL(server.URL)
 		client.SetUserID(123) // Set user ID for testing
 
-		entries, err := client.FetchTimeEntries("2025-01-15")
+		entries, err := client.FetchTimeEntries("2025-01-15", "2025-01-15")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -721,7 +721,7 @@ func TestFetchTimeEntries(t *testing.T) {
 		client.SetBaseURL(server.URL)
 		client.SetUserID(123) // Set user ID for testing
 
-		entries, err := client.FetchTimeEntries("2025-01-15")
+		entries, err := client.FetchTimeEntries("2025-01-15", "2025-01-15")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}

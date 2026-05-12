@@ -382,17 +382,17 @@ func (c *Client) FetchTaskAssignments() ([]TaskAssignment, error) {
 	return allTaskAssignments, nil
 }
 
-// FetchTimeEntries retrieves all time entries for a specific date.
-// The date parameter should be in YYYY-MM-DD format.
-// Handles pagination automatically.
+// FetchTimeEntries retrieves all time entries within the inclusive date range
+// [from, to]. Both parameters should be in YYYY-MM-DD format; pass the same
+// value for both to fetch a single day. Handles pagination automatically.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
-func (c *Client) FetchTimeEntries(date string) ([]TimeEntry, error) {
+func (c *Client) FetchTimeEntries(from, to string) ([]TimeEntry, error) {
 	var allTimeEntries []TimeEntry
 	page := 1
 
 	for {
 		// Filter by user_id to only get current user's entries
-		path := fmt.Sprintf("/v2/time_entries?from=%s&to=%s&user_id=%d&page=%d", date, date, c.userID, page)
+		path := fmt.Sprintf("/v2/time_entries?from=%s&to=%s&user_id=%d&page=%d", from, to, c.userID, page)
 		resp, err := c.Get(path)
 		if err != nil {
 			return nil, fmt.Errorf("network request failed: %w", err)

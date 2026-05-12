@@ -1544,7 +1544,7 @@ type timeEntryDeletedMsg struct {
 func fetchTimeEntriesCmd(client *harvest.Client, date time.Time) tea.Cmd {
 	return func() tea.Msg {
 		dateStr := date.Format("2006-01-02")
-		entries, err := client.FetchTimeEntries(dateStr)
+		entries, err := client.FetchTimeEntries(dateStr, dateStr)
 		return timeEntriesFetchedMsg{entries: entries, err: err}
 	}
 }
