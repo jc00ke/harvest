@@ -7,3 +7,6 @@ bin/
 /config.toml
 completions/
 dist/
+
+# VHS render byproduct (demo.tape requires an Output; only the screenshots are kept)
+images/demo.gif

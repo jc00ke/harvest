@@ -155,17 +155,24 @@ Launch the TUI to browse and edit your timesheet interactively:
 harvest -ui
 ```
 
+To try it without a Harvest account, run it in demo mode, which uses
+built-in sample data and requires no credentials:
+
+```bash
+harvest -ui --demo
+```
+
 ### Time Sheet view
 
-<img width="807" height="611" alt="Time sheet view" src="images/time-sheet-view.png" />
+<img alt="Time sheet view" src="images/time-sheet-view.png" />
 
 ### Add/Edit Time Entry
 
-<img width="807" height="611" alt="Add/edit time entry form" src="images/add-edit-time-entry.png" />
+<img alt="Add/edit time entry form" src="images/add-edit-time-entry.png" />
 
 ### Help Menu
 
-<img width="807" height="611" alt="Help menu overlay" src="images/help-menu.png" />
+<img alt="Help menu overlay" src="images/help-menu.png" />
 
 ### Keybindings
 
@@ -215,6 +222,17 @@ mise run build
 ```bash
 mise run check
 ```
+
+### Regenerating Screenshots
+
+The README screenshots are captured by [VHS](https://github.com/charmbracelet/vhs)
+driving the TUI in demo mode (see `demo.tape`):
+
+```bash
+mise run screenshots
+```
+
+mise provides `vhs` and `ffmpeg`; install `ttyd` separately (`brew install ttyd` on macOS).
 
 ### Releases
 

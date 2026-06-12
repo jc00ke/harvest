@@ -29,6 +29,22 @@ run = "./bin/harvest -ui"
 [tasks.clean]
 run = "rm -rf bin/"
 
+# VHS also needs ttyd, which mise can't install on macOS (no darwin builds
+# in its registry backends) — install it with `brew install ttyd`.
+[tasks.screenshots]
+description = "Regenerate README screenshots by driving the demo-mode TUI with VHS"
+depends = ["build"]
+tools = { vhs = "latest", ffmpeg = "latest" }
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+if ! command -v ttyd > /dev/null; then
+  echo "error: vhs requires ttyd; install it with \\`brew install ttyd\\` (macOS) or your package manager" >&2
+  exit 1
+fi
+vhs demo.tape
+"""
+
 [tasks."release:verify"]
 description = "Download a release's artifacts and verify their attestations, e.g. mise run verify-release v0.1.0"
 usage = 'arg "[version]" help="Release tag to verify, defaults to the latest release"'
