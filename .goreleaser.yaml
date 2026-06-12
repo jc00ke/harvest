@@ -1,5 +1,9 @@
 version: 2
 
+before:
+  hooks:
+    - ./scripts/completions.sh
+
 builds:
   - main: ./cmd/harvest
     binary: harvest
@@ -13,11 +17,12 @@ builds:
       - arm64
 
 archives:
-  - format: tar.gz
+  - formats: [tar.gz]
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     files:
       - README.md
       - LICENSE
+      - completions/*
 
 changelog:
   sort: asc

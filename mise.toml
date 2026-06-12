@@ -1,5 +1,6 @@
 [tools]
 go = "1.26.3"
+goreleaser = "latest"
 usage = "latest"
 
 [tasks.build]

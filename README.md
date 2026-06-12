@@ -69,6 +69,52 @@ The binary will be created at `bin/harvest`.
   mise run build
   ```
 
+### Shell Completions
+
+`harvest completion <shell>` prints a completion script that completes subcommands and flags
+by calling back into the binary, so it always matches the installed version.
+Release archives also ship the scripts in a `completions/` directory.
+
+#### fish
+
+```fish
+harvest completion fish > ~/.config/fish/completions/harvest.fish
+```
+
+Completions are available in new fish sessions immediately.
+
+#### bash
+
+Requires the [bash-completion](https://github.com/scop/bash-completion) package (v2).
+
+```bash
+# Linux, current user only
+mkdir -p ~/.local/share/bash-completion/completions
+harvest completion bash > ~/.local/share/bash-completion/completions/harvest
+
+# Linux, all users
+harvest completion bash | sudo tee /etc/bash_completion.d/harvest > /dev/null
+
+# macOS with Homebrew's bash-completion@2
+harvest completion bash > "$(brew --prefix)/etc/bash_completion.d/harvest"
+```
+
+Open a new shell to pick up the completions.
+
+#### zsh
+
+```zsh
+# Place the script in any directory on your $fpath, e.g.
+harvest completion zsh > "${fpath[1]}/_harvest"
+
+# or with Homebrew
+harvest completion zsh > "$(brew --prefix)/share/zsh/site-functions/_harvest"
+```
+
+If completions aren't already enabled in your shell, also add `autoload -U compinit; compinit` to your `~/.zshrc`. Then open a new shell.
+
+PowerShell is also supported; run `harvest completion powershell --help` for details.
+
 ## Configuration
 
 ### Getting Harvest API Credentials
