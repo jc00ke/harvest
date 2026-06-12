@@ -1,18 +1,6 @@
-# Harvest TUI Time Tracker
+# harvest
 
-A terminal-based time tracking application that connects to the [Harvest API v2](https://help.getharvest.com/api-v2/), allowing users to manage their daily time entries from the CLI.
-
-## Time Sheet view
-
-<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/c2700762-410e-41f5-9a50-d28836ff7242" />
-
-### Add/Edit Time Entry
-
-<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/7d7c8537-c668-4c77-8692-42472ccaa889" />
-
-### Help Menu
-
-<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/dda8f9db-c3dc-455e-ba90-898d9bb003e9" />
+A command-line tool for managing your Harvest time entries, projects, and tasks, built on the [Harvest API v2](https://help.getharvest.com/api-v2/). It also includes an [interactive TUI](#interactive-tui) (`harvest -ui`) for browsing and editing your timesheet from the terminal.
 
 ## Installation
 
@@ -136,19 +124,48 @@ You'll be prompted for your Account ID and Access Token. Use `harvest auth statu
 
 ## Usage
 
-Run `harvest` for the command-line interface:
+### CLI
 
 ```bash
-harvest entries list
-harvest entries start
-harvest --help
+harvest entries list              # list time entries for a date (defaults to today)
+harvest entries list --date 2026-06-08 --week   # a 7-day window starting at --date
+harvest entries list --summary    # aggregate the week per client per day
+harvest entries create            # log time
+harvest entries start             # start the timer on an existing entry
+harvest entries stop              # stop a running timer
+harvest entries edit              # edit an existing entry
+harvest entries delete            # delete an entry
+harvest projects                  # list projects and their tasks
+harvest me                        # show the authenticated user
 ```
 
-Or launch the interactive TUI:
+Every command accepts `--json` to output results as JSON instead of a table, which makes the CLI easy to script with tools like `jq`:
+
+```bash
+harvest --json entries list | jq '.[].hours'
+```
+
+Run `harvest --help` or `harvest <command> --help` for full details.
+
+## Interactive TUI
+
+Launch the TUI to browse and edit your timesheet interactively:
 
 ```bash
 harvest -ui
 ```
+
+### Time Sheet view
+
+<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/c2700762-410e-41f5-9a50-d28836ff7242" />
+
+### Add/Edit Time Entry
+
+<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/7d7c8537-c668-4c77-8692-42472ccaa889" />
+
+### Help Menu
+
+<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/dda8f9db-c3dc-455e-ba90-898d9bb003e9" />
 
 ### Keybindings
 
