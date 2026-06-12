@@ -27,4 +27,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Warm Go module proxy
-        run: GOPROXY=proxy.golang.org go list -m github.com/planetargon/harvest-tui@${{ github.ref_name }}
+        run: GOPROXY=proxy.golang.org go list -m github.com/jc00ke/harvest@${{ github.ref_name }}

@@ -32,3 +32,29 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, darwin]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: go build -o bin/harvest ./cmd/harvest
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: harvest_${{ matrix.goos }}_${{ matrix.goarch }}
+          path: bin/harvest

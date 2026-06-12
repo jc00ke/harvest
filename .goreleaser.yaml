@@ -1,8 +1,8 @@
 version: 2
 
 builds:
-  - main: ./cmd/harvest-tui
-    binary: harvest-tui
+  - main: ./cmd/harvest
+    binary: harvest
     env:
       - CGO_ENABLED=0
     goos:
