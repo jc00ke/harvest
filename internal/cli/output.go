@@ -81,6 +81,28 @@ func renderEntries(w io.Writer, entries []harvest.TimeEntry) error {
 	return tw.Flush()
 }
 
+// renderEntrySummaries writes per-client per-day summaries as JSON or a table.
+func renderEntrySummaries(w io.Writer, summaries []entrySummary) error {
+	if outputJSON {
+		return renderJSON(w, summaries)
+	}
+	if len(summaries) == 0 {
+		_, err := fmt.Fprintln(w, "(no time entries)")
+		return err
+	}
+	tw := newTabWriter(w)
+	fmt.Fprintln(tw, "CLIENT\tDATE\tHOURS\tNOTES")
+	for _, s := range summaries {
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n",
+			s.Client,
+			s.Date,
+			formatHours(s.Hours),
+			truncate(s.Notes, 60),
+		)
+	}
+	return tw.Flush()
+}
+
 // renderEntry writes a single time entry as JSON or a key/value table.
 func renderEntry(w io.Writer, e *harvest.TimeEntry) error {
 	if outputJSON {
