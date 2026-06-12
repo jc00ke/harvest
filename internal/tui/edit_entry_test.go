@@ -6,9 +6,9 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/planetargon/harvest-tui/internal/config"
-	"github.com/planetargon/harvest-tui/internal/harvest"
-	"github.com/planetargon/harvest-tui/internal/state"
+	"github.com/jc00ke/harvest/internal/config"
+	"github.com/jc00ke/harvest/internal/harvest"
+	"github.com/jc00ke/harvest/internal/state"
 )
 
 func TestEditEntry(t *testing.T) {

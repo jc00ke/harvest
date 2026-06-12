@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/planetargon/harvest-tui/internal/harvest"
+	"github.com/jc00ke/harvest/internal/harvest"
 )
 
 // entrySummary aggregates time entries for one client on one date.

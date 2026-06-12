@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/planetargon/harvest-tui/internal/harvest"
+	"github.com/jc00ke/harvest/internal/harvest"
 )
 
 // renderJSON marshals v to JSON and writes it to w with a trailing newline.

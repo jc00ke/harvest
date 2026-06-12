@@ -1,58 +1,54 @@
-package main
+package tui
 
 import (
 	"fmt"
-	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/planetargon/harvest-tui/internal/config"
-	"github.com/planetargon/harvest-tui/internal/harvest"
-	"github.com/planetargon/harvest-tui/internal/state"
-	"github.com/planetargon/harvest-tui/internal/tui"
+	"github.com/jc00ke/harvest/internal/config"
+	"github.com/jc00ke/harvest/internal/harvest"
+	"github.com/jc00ke/harvest/internal/state"
 )
 
-func main() {
-	// Load configuration
+// Run loads configuration and state, validates Harvest credentials, and runs
+// the TUI program. It returns the process exit code.
+func Run() int {
 	cfg, err := config.Load()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)
+		return 1
 	}
 
-	// Load application state
 	appState, err := state.Load()
 	if err != nil {
 		fmt.Printf("Error loading state: %v\n", err)
-		os.Exit(1)
+		return 1
 	}
 
-	// Initialize Harvest client
 	harvestClient := harvest.NewClient(cfg.Harvest.AccountID, cfg.Harvest.AccessToken)
 
-	// Validate authentication before starting TUI
+	// Validate authentication before starting the TUI
 	user, err := harvestClient.ValidateAuth()
 	if err != nil {
 		fmt.Printf("Authentication failed: %v\n", err)
-		fmt.Println("Please check your Harvest credentials. Run `harvest-cli auth login` to update them.")
+		fmt.Println("Please check your Harvest credentials. Run `harvest auth login` to update them.")
 		fmt.Printf("\nTo get started, set up your Harvest API credentials:\n%s\n", config.SetupInstructionsURL)
-		os.Exit(1)
+		return 1
 	}
 
 	fmt.Printf("Welcome, %s!\n", user.FirstName+" "+user.LastName)
 	fmt.Printf("Starting Harvest TUI...\n")
 
-	// Initialize TUI model
-	model := tui.NewModel(cfg, harvestClient, appState, user)
+	model := NewModel(cfg, harvestClient, appState, user)
 
-	// Create and run the program
 	p := tea.NewProgram(model, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)
+		return 1
 	}
 
 	// Save state on exit
 	if err := appState.Save(); err != nil {
 		fmt.Printf("Warning: Could not save state: %v\n", err)
 	}
+	return 0
 }

@@ -1,4 +1,4 @@
-module github.com/planetargon/harvest-tui
+module github.com/jc00ke/harvest
 
 go 1.25.5
 

@@ -12,7 +12,7 @@ import (
 
 const (
 	DefaultBaseURL = "https://api.harvestapp.com"
-	UserAgent      = "harvest-tui (github.com/planetargon/harvest-tui)"
+	UserAgent      = "harvest (github.com/jc00ke/harvest)"
 )
 
 // User represents a Harvest user returned by the API.

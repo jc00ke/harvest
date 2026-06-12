@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/planetargon/harvest-tui/internal/config"
+	"github.com/jc00ke/harvest/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +60,7 @@ func renderAuthStatus(w io.Writer, status authStatus) error {
 		return err
 	}
 	if status.ActiveSource == "none" {
-		_, err := fmt.Fprintln(w, "\nNo credentials found. Run `harvest-cli auth login` to store credentials in your keyring.")
+		_, err := fmt.Fprintln(w, "\nNo credentials found. Run `harvest auth login` to store credentials in your keyring.")
 		return err
 	}
 	return nil

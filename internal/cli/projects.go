@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/planetargon/harvest-tui/internal/harvest"
+	"github.com/jc00ke/harvest/internal/harvest"
 	"github.com/spf13/cobra"
 )
 

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/planetargon/harvest-tui/internal/harvest"
+	"github.com/jc00ke/harvest/internal/harvest"
 )
 
 // shellWidth returns the standard box width for the shell.

@@ -1,4 +1,4 @@
-// Package cli implements the harvest-cli command-line interface backed by the
+// Package cli implements the harvest command-line interface backed by the
 // same internal/harvest API client that powers the TUI.
 package cli
 
@@ -6,21 +6,21 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/planetargon/harvest-tui/internal/config"
-	"github.com/planetargon/harvest-tui/internal/harvest"
+	"github.com/jc00ke/harvest/internal/config"
+	"github.com/jc00ke/harvest/internal/harvest"
 	"github.com/spf13/cobra"
 )
 
 // outputJSON is set by the --json persistent flag on the root command.
 var outputJSON bool
 
-// NewRootCommand builds the harvest-cli command tree. Exported so tests can
+// NewRootCommand builds the harvest command tree. Exported so tests can
 // exercise it without going through main.
 func NewRootCommand() *cobra.Command {
 	root := &cobra.Command{
-		Use:           "harvest-cli",
+		Use:           "harvest",
 		Short:         "Command-line client for the Harvest API",
-		Long:          "harvest-cli is a CLI for managing Harvest time entries, projects, and tasks. It shares credentials and behavior with harvest-tui.",
+		Long:          "harvest is a CLI for managing Harvest time entries, projects, and tasks.\nRun `harvest -ui` to launch the interactive TUI instead.",
 		SilenceUsage:  true,
 		SilenceErrors: false,
 	}

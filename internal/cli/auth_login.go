@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/planetargon/harvest-tui/internal/config"
-	"github.com/planetargon/harvest-tui/internal/harvest"
+	"github.com/jc00ke/harvest/internal/config"
+	"github.com/jc00ke/harvest/internal/harvest"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )

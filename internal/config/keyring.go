@@ -7,8 +7,8 @@ import (
 	"github.com/zalando/go-keyring"
 )
 
-// keyringService is the OS keyring service name shared by harvest-tui and harvest-cli.
-const keyringService = "harvest-tui"
+// keyringService is the OS keyring service name.
+const keyringService = "harvest"
 
 // keyringUser is the fixed account identifier for the single keyring entry that
 // holds the Harvest account ID and access token as a JSON-encoded blob.

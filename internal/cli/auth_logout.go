@@ -3,7 +3,7 @@ package cli
 import (
 	"errors"
 
-	"github.com/planetargon/harvest-tui/internal/config"
+	"github.com/jc00ke/harvest/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/zalando/go-keyring"
 )

@@ -15,7 +15,7 @@ func TestStateLoading(t *testing.T) {
 
 		os.Setenv("HOME", tempDir)
 
-		stateDir := filepath.Join(tempDir, ".config", "harvest-tui")
+		stateDir := filepath.Join(tempDir, ".config", "harvest")
 		err := os.MkdirAll(stateDir, 0755)
 		if err != nil {
 			t.Fatal(err)
@@ -83,7 +83,7 @@ func TestStateLoading(t *testing.T) {
 
 		os.Setenv("HOME", tempDir)
 
-		stateDir := filepath.Join(tempDir, ".config", "harvest-tui")
+		stateDir := filepath.Join(tempDir, ".config", "harvest")
 		err := os.MkdirAll(stateDir, 0755)
 		if err != nil {
 			t.Fatal(err)
@@ -113,7 +113,7 @@ func TestStateLoading(t *testing.T) {
 
 		os.Setenv("HOME", tempDir)
 
-		stateDir := filepath.Join(tempDir, ".config", "harvest-tui")
+		stateDir := filepath.Join(tempDir, ".config", "harvest")
 		err := os.MkdirAll(stateDir, 0755)
 		if err != nil {
 			t.Fatal(err)
@@ -157,7 +157,7 @@ func TestStateSaving(t *testing.T) {
 			t.Fatalf("expected no error saving state, got %v", err)
 		}
 
-		statePath := filepath.Join(tempDir, ".config", "harvest-tui", "state.json")
+		statePath := filepath.Join(tempDir, ".config", "harvest", "state.json")
 		data, err := os.ReadFile(statePath)
 		if err != nil {
 			t.Fatalf("expected state file to exist, got error: %v", err)
@@ -194,7 +194,7 @@ func TestStateSaving(t *testing.T) {
 			t.Fatalf("expected no error saving empty state, got %v", err)
 		}
 
-		statePath := filepath.Join(tempDir, ".config", "harvest-tui", "state.json")
+		statePath := filepath.Join(tempDir, ".config", "harvest", "state.json")
 		data, err := os.ReadFile(statePath)
 		if err != nil {
 			t.Fatalf("expected state file to exist, got error: %v", err)
@@ -225,7 +225,7 @@ func TestStateSaving(t *testing.T) {
 			t.Fatalf("expected no error saving to non-existent directory, got %v", err)
 		}
 
-		stateDir := filepath.Join(tempDir, ".config", "harvest-tui")
+		stateDir := filepath.Join(tempDir, ".config", "harvest")
 		if _, err := os.Stat(stateDir); os.IsNotExist(err) {
 			t.Error("expected state directory to be created")
 		}

@@ -2,8 +2,6 @@
 
 A terminal-based time tracking application that connects to the [Harvest API v2](https://help.getharvest.com/api-v2/), allowing users to manage their daily time entries from the CLI.
 
-[Planet Argon](https://www.planetargon.com) has been a long-time customer of Harvest and our software engineers wanted to build a tool for tracking client billables from the command line. This is an open source project that integrates with the Harvest API — there is no collaboration with or endorsement by either party.
-
 ## Time Sheet view
 
 <img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/c2700762-410e-41f5-9a50-d28836ff7242" />
@@ -20,19 +18,19 @@ A terminal-based time tracking application that connects to the [Harvest API v2]
 
 ### Download a Release Binary (Recommended)
 
-Download the latest binary for your platform from the [Releases page](https://github.com/planetargon/harvest-tui/releases).
+Download the latest binary for your platform from the [Releases page](https://github.com/jc00ke/harvest/releases).
 
 Or use curl to download directly (example for macOS Apple Silicon):
 
 ```bash
-curl -sL https://github.com/planetargon/harvest-tui/releases/latest/download/harvest-tui_darwin_arm64.tar.gz | tar xz
-sudo mv harvest-tui /usr/local/bin/
+curl -sL https://github.com/jc00ke/harvest/releases/latest/download/harvest_darwin_arm64.tar.gz | tar xz
+sudo mv harvest /usr/local/bin/
 ```
 
 ### Install with Go
 
 ```bash
-go install github.com/planetargon/harvest-tui/cmd/harvest-tui@latest
+go install github.com/jc00ke/harvest/cmd/harvest@latest
 ```
 
 The binary is installed to `~/go/bin`. If that directory isn't already on your `$PATH`, add it:
@@ -41,15 +39,15 @@ The binary is installed to `~/go/bin`. If that directory isn't already on your `
 export PATH="$HOME/go/bin:$PATH"
 ```
 
-Otherwise, you can run it directly with `~/go/bin/harvest-tui`.
+Otherwise, you can run it directly with `~/go/bin/harvest`.
 
 ### Build from Source
 
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/planetargon/harvest-tui.git
-   cd harvest-tui
+   git clone https://github.com/jc00ke/harvest.git
+   cd harvest
    ```
 
 2. Build the application:
@@ -58,12 +56,12 @@ Otherwise, you can run it directly with `~/go/bin/harvest-tui`.
    mise run build
    ```
 
-The binary will be created at `bin/harvest-tui`.
+The binary will be created at `bin/harvest`.
 
 ## Updating
 
-- **Release binary:** Download the latest version from the [Releases page](https://github.com/planetargon/harvest-tui/releases) and replace the existing binary.
-- **Go install:** Run `go install github.com/planetargon/harvest-tui/cmd/harvest-tui@latest` again.
+- **Release binary:** Download the latest version from the [Releases page](https://github.com/jc00ke/harvest/releases) and replace the existing binary.
+- **Go install:** Run `go install github.com/jc00ke/harvest/cmd/harvest@latest` again.
 - **Build from source:** Pull the latest changes and rebuild:
 
   ```bash
@@ -85,17 +83,25 @@ The binary will be created at `bin/harvest-tui`.
 Store your credentials in the OS keyring:
 
 ```bash
-harvest-cli auth login
+harvest auth login
 ```
 
-You'll be prompted for your Account ID and Access Token. Use `harvest-cli auth status` to verify, and `harvest-cli auth logout` to remove them.
+You'll be prompted for your Account ID and Access Token. Use `harvest auth status` to verify, and `harvest auth logout` to remove them.
 
 ## Usage
 
-Launch the application:
+Run `harvest` for the command-line interface:
 
 ```bash
-harvest-tui
+harvest entries list
+harvest entries start
+harvest --help
+```
+
+Or launch the interactive TUI:
+
+```bash
+harvest -ui
 ```
 
 ### Keybindings
@@ -149,16 +155,10 @@ mise run check
 
 ## Disclaimer
 
-[Harvest](https://www.getharvest.com/) is a registered trademark of [Bending Spoons US Inc](https://bendingspoons.com/). This project has no direct affiliation with Harvest or Bending Spoons. It is an independent open source project that integrates with the [Harvest API v2](https://help.getharvest.com/api-v2/).
+[Harvest](https://www.getharvest.com/) is a registered trademark of [Bending Spoons US Inc](https://bendingspoons.com/).
+This project has no direct affiliation with Harvest or Bending Spoons.
+It is an independent open source project that integrates with the [Harvest API v2](https://help.getharvest.com/api-v2/).
 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-## About Planet Argon
-
-![Planet Argon](https://pa-github-assets.s3.amazonaws.com/PARGON_logo_digital_COL-small.jpg)
-
-Oh My Zsh was started by the team at [Planet Argon](https://www.planetargon.com/?utm_source=github), a
-[Ruby on Rails development consultancy](https://www.planetargon.com/services/ruby-on-rails-development?utm_source=github).
-Check out our [other open source projects](https://www.planetargon.com/open-source?utm_source=github).

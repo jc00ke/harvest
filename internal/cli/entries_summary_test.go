@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/planetargon/harvest-tui/internal/harvest"
+	"github.com/jc00ke/harvest/internal/harvest"
 )
 
 func entry(client, date, notes string, hours float64) harvest.TimeEntry {

@@ -93,5 +93,5 @@ func getStatePath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(homeDir, ".config", "harvest-tui", "state.json"), nil
+	return filepath.Join(homeDir, ".config", "harvest", "state.json"), nil
 }

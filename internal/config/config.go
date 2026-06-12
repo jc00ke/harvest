@@ -7,7 +7,7 @@ import (
 	"github.com/zalando/go-keyring"
 )
 
-const SetupInstructionsURL = "https://github.com/planetargon/harvest-tui?tab=readme-ov-file#getting-harvest-api-credentials"
+const SetupInstructionsURL = "https://github.com/jc00ke/harvest?tab=readme-ov-file#getting-harvest-api-credentials"
 
 type Config struct {
 	Harvest HarvestConfig
@@ -23,7 +23,7 @@ func Load() (*Config, error) {
 	cfg, err := LoadFromKeyring()
 	if err != nil {
 		if errors.Is(err, keyring.ErrNotFound) {
-			return nil, fmt.Errorf("could not load credentials. Run `harvest-cli auth login` to store credentials in your OS keyring.\n\nTo get started, set up your Harvest API credentials:\n%s", SetupInstructionsURL)
+			return nil, fmt.Errorf("could not load credentials. Run `harvest auth login` to store credentials in your OS keyring.\n\nTo get started, set up your Harvest API credentials:\n%s", SetupInstructionsURL)
 		}
 		return nil, fmt.Errorf("could not load credentials from keyring: %w", err)
 	}

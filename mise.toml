@@ -2,13 +2,7 @@
 go = "1.26.3"
 
 [tasks.build]
-depends = ["build-tui", "build-cli"]
-
-[tasks.build-tui]
-run = "go build -o bin/harvest-tui ./cmd/harvest-tui"
-
-[tasks.build-cli]
-run = "go build -o bin/harvest-cli ./cmd/harvest-cli"
+run = "go build -o bin/harvest ./cmd/harvest"
 
 [tasks.test]
 run = "go test -v ./..."
@@ -23,12 +17,12 @@ run = "go fmt ./..."
 depends = ["fmt", "lint", "test"]
 
 [tasks.run]
-depends = ["build-tui"]
-run = "./bin/harvest-tui"
+depends = ["build"]
+run = "./bin/harvest"
 
-[tasks.run-cli]
-depends = ["build-cli"]
-run = "./bin/harvest-cli"
+[tasks.run-ui]
+depends = ["build"]
+run = "./bin/harvest -ui"
 
 [tasks.clean]
 run = "rm -rf bin/"

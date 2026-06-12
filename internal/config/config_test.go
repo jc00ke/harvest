@@ -73,7 +73,7 @@ func TestConfig(t *testing.T) {
 			t.Fatal("expected error for missing credentials")
 		}
 
-		if got, want := err.Error(), "could not load credentials. Run `harvest-cli auth login` to store credentials in your OS keyring.\n\nTo get started, set up your Harvest API credentials:\n"+SetupInstructionsURL; got != want {
+		if got, want := err.Error(), "could not load credentials. Run `harvest auth login` to store credentials in your OS keyring.\n\nTo get started, set up your Harvest API credentials:\n"+SetupInstructionsURL; got != want {
 			t.Errorf("error=%q, want=%q", got, want)
 		}
 	})
