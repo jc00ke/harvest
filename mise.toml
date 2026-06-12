@@ -60,7 +60,7 @@ if [[ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]]; then
   exit 1
 fi
 
-git tag -a "$version" -m "$version"
+git tag -s "$version" -m "$version"
 git push origin "$version"
 echo "Pushed $version. Watch the release at https://github.com/jc00ke/harvest/actions"
 '''
