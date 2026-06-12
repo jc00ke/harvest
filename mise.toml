@@ -1,5 +1,6 @@
 [tools]
 go = "1.26.3"
+usage = "latest"
 
 [tasks.build]
 run = "go build -o bin/harvest ./cmd/harvest"
@@ -30,11 +31,12 @@ run = "rm -rf bin/"
 [tasks.release]
 description = "Tag a release and push it to trigger the release workflow, e.g. mise run release v0.1.0"
 depends = ["check"]
+usage = 'arg "<version>" help="Version to tag, e.g. v0.1.0"'
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
 
-version="{{arg(name="version")}}"
+version="${usage_version:?}"
 
 if [[ ! "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   echo "error: version must look like v1.2.3, got: $version" >&2
