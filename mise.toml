@@ -29,6 +29,33 @@ run = "./bin/harvest -ui"
 [tasks.clean]
 run = "rm -rf bin/"
 
+[tasks."release:verify"]
+description = "Download a release's artifacts and verify their attestations, e.g. mise run verify-release v0.1.0"
+usage = 'arg "[version]" help="Release tag to verify, defaults to the latest release"'
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo="jc00ke/harvest"
+version="${usage_version:-}"
+if [[ -z "$version" ]]; then
+  version=$(gh release view --json tagName --jq .tagName -R "$repo")
+fi
+
+tmpdir=$(mktemp -d)
+trap 'echo "verification failed, artifacts left in $tmpdir for inspection" >&2' ERR
+
+echo "Downloading $version artifacts to $tmpdir"
+gh release download "$version" -R "$repo" -p '*.tar.gz' -D "$tmpdir"
+
+for artifact in "$tmpdir"/*.tar.gz; do
+  gh attestation verify "$artifact" -R "$repo"
+done
+
+rm -rf "$tmpdir"
+echo "All $version artifacts verified, cleaned up $tmpdir"
+'''
+
 [tasks.release]
 description = "Tag a release and push it to trigger the release workflow, e.g. mise run release v0.1.0"
 depends = ["check"]
