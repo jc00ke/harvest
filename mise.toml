@@ -1,0 +1,34 @@
+[tools]
+go = "1.26.3"
+
+[tasks.build]
+depends = ["build-tui", "build-cli"]
+
+[tasks.build-tui]
+run = "go build -o bin/harvest-tui ./cmd/harvest-tui"
+
+[tasks.build-cli]
+run = "go build -o bin/harvest-cli ./cmd/harvest-cli"
+
+[tasks.test]
+run = "go test -v ./..."
+
+[tasks.lint]
+run = "go vet ./..."
+
+[tasks.fmt]
+run = "go fmt ./..."
+
+[tasks.check]
+depends = ["fmt", "lint", "test"]
+
+[tasks.run]
+depends = ["build-tui"]
+run = "./bin/harvest-tui"
+
+[tasks.run-cli]
+depends = ["build-cli"]
+run = "./bin/harvest-cli"
+
+[tasks.clean]
+run = "rm -rf bin/"
