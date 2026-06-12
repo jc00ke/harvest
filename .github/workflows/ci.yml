@@ -50,7 +50,7 @@ jobs:
           CGO_ENABLED: 0
         run: go build -o bin/harvest ./cmd/harvest
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: harvest_${{ matrix.goos }}_${{ matrix.goarch }}
           path: bin/harvest
