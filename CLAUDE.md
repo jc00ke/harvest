@@ -2,7 +2,15 @@
 
 ## Before Every Commit
 
-Run `make check` and ensure it passes.
+Run `mise run check` and ensure it passes.
+Prefer the mise tasks over direct commands. For instance
+
+```bash
+# prefer
+mise run lint
+# over
+go vet ./...
+```
 
 ## Commit Message Format
 
