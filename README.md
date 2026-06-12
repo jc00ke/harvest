@@ -159,6 +159,11 @@ mise run check
 This project has no direct affiliation with Harvest or Bending Spoons.
 It is an independent open source project that integrates with the [Harvest API v2](https://help.getharvest.com/api-v2/).
 
+## Credit
+
+I forked this from [Planet Argon's harvest-tui](https://github.com/planetargon/harvest-tui).
+If you need Ruby, Rails, AI Safety consulting, you should check out their [services](https://www.planetargon.com/services).
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
