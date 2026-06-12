@@ -153,6 +153,12 @@ mise run build
 mise run check
 ```
 
+### Releases
+
+```bash
+mise run release v0.1.0
+```
+
 ## Disclaimer
 
 [Harvest](https://www.getharvest.com/) is a registered trademark of [Bending Spoons US Inc](https://bendingspoons.com/).
