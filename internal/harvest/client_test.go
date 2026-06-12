@@ -1675,3 +1675,109 @@ func TestAggregateProjectsWithTasks(t *testing.T) {
 		}
 	})
 }
+
+func TestAPIErrorsIncludeResponseBody(t *testing.T) {
+	t.Run("given JSON message body when CreateTimeEntry fails then error includes message", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "Notes can't be blank",
+			})
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		_, err := client.CreateTimeEntry(CreateTimeEntryRequest{ProjectID: 1, TaskID: 2, SpentDate: "2026-06-12", Hours: 1.5})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err.Error(), "failed to create time entry with status 422: Notes can't be blank"; got != want {
+			t.Errorf("error=%q, want=%q", got, want)
+		}
+	})
+
+	t.Run("given error_description body when ValidateAuth fails then error includes description", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"error":             "invalid_token",
+				"error_description": "The access token is invalid",
+			})
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "invalid-token")
+		client.SetBaseURL(server.URL)
+
+		_, err := client.ValidateAuth()
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err.Error(), "authentication failed with status 401: The access token is invalid"; got != want {
+			t.Errorf("error=%q, want=%q", got, want)
+		}
+	})
+
+	t.Run("given non-JSON body when DeleteTimeEntry fails then error includes raw body", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadGateway)
+			fmt.Fprint(w, "upstream timeout")
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		err := client.DeleteTimeEntry(123)
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err.Error(), "failed to delete time entry with status 502: upstream timeout"; got != want {
+			t.Errorf("error=%q, want=%q", got, want)
+		}
+	})
+
+	t.Run("given empty body when StopTimeEntry fails then error only includes status", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		_, err := client.StopTimeEntry(123)
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err.Error(), "failed to stop time entry with status 422"; got != want {
+			t.Errorf("error=%q, want=%q", got, want)
+		}
+	})
+
+	t.Run("given JSON message body when FetchProjects fails then error includes message", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "The object you requested was not found",
+			})
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		_, err := client.FetchProjects()
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err.Error(), "failed to fetch projects with status 403: The object you requested was not found"; got != want {
+			t.Errorf("error=%q, want=%q", got, want)
+		}
+	})
+}

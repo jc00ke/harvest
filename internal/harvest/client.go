@@ -281,6 +281,43 @@ func (c *Client) setHeaders(req *http.Request, hasBody bool) {
 	}
 }
 
+// apiError builds an error for a non-success API response, including a
+// message extracted from the response body when one is present.
+func apiError(action string, resp *http.Response) error {
+	if msg := errorMessage(resp); msg != "" {
+		return fmt.Errorf("%s with status %d: %s", action, resp.StatusCode, msg)
+	}
+	return fmt.Errorf("%s with status %d", action, resp.StatusCode)
+}
+
+// errorMessage extracts a human-readable message from an error response body.
+// It understands Harvest's JSON error shapes ({"message": ...} and
+// {"error": ..., "error_description": ...}) and falls back to the raw body.
+func errorMessage(resp *http.Response) string {
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	if err != nil {
+		return ""
+	}
+
+	var parsed struct {
+		Message          string `json:"message"`
+		Error            string `json:"error"`
+		ErrorDescription string `json:"error_description"`
+	}
+	if err := json.Unmarshal(body, &parsed); err == nil {
+		switch {
+		case parsed.Message != "":
+			return parsed.Message
+		case parsed.ErrorDescription != "":
+			return parsed.ErrorDescription
+		case parsed.Error != "":
+			return parsed.Error
+		}
+	}
+
+	return string(bytes.TrimSpace(body))
+}
+
 // ValidateAuth validates the credentials by calling GET /v2/users/me.
 // Returns the authenticated user on success and stores the user ID.
 // API Reference: https://help.getharvest.com/api-v2/users-api/users/users/#retrieve-the-currently-authenticated-user
@@ -292,7 +329,7 @@ func (c *Client) ValidateAuth() (*User, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("authentication failed with status %d", resp.StatusCode)
+		return nil, apiError("authentication failed", resp)
 	}
 
 	var user User
@@ -321,8 +358,9 @@ func (c *Client) FetchProjects() ([]Project, error) {
 		}
 
 		if resp.StatusCode != http.StatusOK {
+			err := apiError("failed to fetch projects", resp)
 			resp.Body.Close()
-			return nil, fmt.Errorf("failed to fetch projects with status %d", resp.StatusCode)
+			return nil, err
 		}
 
 		var projectsResp projectsResponse
@@ -359,8 +397,9 @@ func (c *Client) FetchTaskAssignments() ([]TaskAssignment, error) {
 		}
 
 		if resp.StatusCode != http.StatusOK {
+			err := apiError("failed to fetch task assignments", resp)
 			resp.Body.Close()
-			return nil, fmt.Errorf("failed to fetch task assignments with status %d", resp.StatusCode)
+			return nil, err
 		}
 
 		var taskAssignmentsResp taskAssignmentsResponse
@@ -399,8 +438,9 @@ func (c *Client) FetchTimeEntries(from, to string) ([]TimeEntry, error) {
 		}
 
 		if resp.StatusCode != http.StatusOK {
+			err := apiError("failed to fetch time entries", resp)
 			resp.Body.Close()
-			return nil, fmt.Errorf("failed to fetch time entries with status %d", resp.StatusCode)
+			return nil, err
 		}
 
 		var timeEntriesResp timeEntriesResponse
@@ -432,7 +472,7 @@ func (c *Client) CreateTimeEntry(request CreateTimeEntryRequest) (*TimeEntry, er
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("failed to create time entry with status %d", resp.StatusCode)
+		return nil, apiError("failed to create time entry", resp)
 	}
 
 	var timeEntry TimeEntry
@@ -454,7 +494,7 @@ func (c *Client) UpdateTimeEntry(id int, request UpdateTimeEntryRequest) (*TimeE
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to update time entry with status %d", resp.StatusCode)
+		return nil, apiError("failed to update time entry", resp)
 	}
 
 	var timeEntry TimeEntry
@@ -476,7 +516,7 @@ func (c *Client) DeleteTimeEntry(id int) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to delete time entry with status %d", resp.StatusCode)
+		return apiError("failed to delete time entry", resp)
 	}
 
 	return nil
@@ -493,7 +533,7 @@ func (c *Client) RestartTimeEntry(id int) (*TimeEntry, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to restart time entry with status %d", resp.StatusCode)
+		return nil, apiError("failed to restart time entry", resp)
 	}
 
 	var timeEntry TimeEntry
@@ -515,7 +555,7 @@ func (c *Client) StopTimeEntry(id int) (*TimeEntry, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to stop time entry with status %d", resp.StatusCode)
+		return nil, apiError("failed to stop time entry", resp)
 	}
 
 	var timeEntry TimeEntry
