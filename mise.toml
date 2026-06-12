@@ -52,7 +52,7 @@ vhs demo.tape
 """
 
 [tasks."release:verify"]
-description = "Download a release's artifacts and verify their attestations, e.g. mise run verify-release v0.1.0"
+description = "Download a release's artifacts and verify their attestations, e.g. mise run release:verify v0.1.0"
 usage = 'arg "[version]" help="Release tag to verify, defaults to the latest release"'
 run = '''
 #!/usr/bin/env bash
