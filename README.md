@@ -157,15 +157,15 @@ harvest -ui
 
 ### Time Sheet view
 
-<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/c2700762-410e-41f5-9a50-d28836ff7242" />
+<img width="807" height="611" alt="Time sheet view" src="images/time-sheet-view.png" />
 
 ### Add/Edit Time Entry
 
-<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/7d7c8537-c668-4c77-8692-42472ccaa889" />
+<img width="807" height="611" alt="Add/edit time entry form" src="images/add-edit-time-entry.png" />
 
 ### Help Menu
 
-<img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/dda8f9db-c3dc-455e-ba90-898d9bb003e9" />
+<img width="807" height="611" alt="Help menu overlay" src="images/help-menu.png" />
 
 ### Keybindings
 
