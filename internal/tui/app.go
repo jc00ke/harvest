@@ -44,6 +44,8 @@ const (
 	ViewDurationInput
 	// ViewBillableToggle is the view for toggling billable status for a new time entry.
 	ViewBillableToggle
+	// ViewWeekSummary is the weekly summary view showing per-day and per-project totals.
+	ViewWeekSummary
 )
 
 // Model represents the state of the TUI application.
@@ -62,6 +64,11 @@ type Model struct {
 	projectsWithTasks  []harvest.ProjectWithTasks
 	selectedEntryIndex int
 	currentUser        *harvest.User
+
+	// Weekly summary state
+	weekStart   time.Time
+	weekEntries []harvest.TimeEntry
+	weekLoading bool
 
 	// New entry creation state
 	selectedProject      *harvest.Project
@@ -217,6 +224,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
+	case weekEntriesFetchedMsg:
+		if msg.err != nil {
+			m.errorMessage = "Failed to fetch week entries: " + msg.err.Error()
+		} else {
+			m.weekEntries = msg.entries
+			m.errorMessage = ""
+		}
+		m.weekLoading = false
+		return m, nil
+
 	case projectsWithTasksFetchedMsg:
 		if msg.err != nil {
 			m.errorMessage = "Failed to fetch projects: " + msg.err.Error()
@@ -364,6 +381,8 @@ func (m Model) View() string {
 		return m.renderDurationInputView()
 	case ViewBillableToggle:
 		return m.renderBillableToggleView()
+	case ViewWeekSummary:
+		return m.renderWeekSummaryView()
 	default:
 		return "Unknown view"
 	}
@@ -420,6 +439,8 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		result, cmd = m.handleDurationInputKeys(msg)
 	case ViewBillableToggle:
 		result, cmd = m.handleBillableToggleKeys(msg)
+	case ViewWeekSummary:
+		result, cmd = m.handleWeekSummaryKeys(msg)
 	default:
 		return m, nil
 	}
@@ -847,6 +868,7 @@ func (m Model) renderHelpView() string {
 		"    ←/h       Previous day",
 		"    →/l       Next day",
 		"    t         Jump to today",
+		"    w         Weekly summary",
 		"",
 		"  " + AccentText.Render("Time Entry Actions"),
 		"    n         New entry",
@@ -1061,6 +1083,13 @@ func (m Model) handleListViewKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.loading = true
 		m.clearStatusMessage()
 		return m, fetchTimeEntriesCmd(m.harvestClient, m.currentDate)
+
+	case key.Matches(msg, keys.Week):
+		m.currentView = ViewWeekSummary
+		m.weekStart = mondayOf(m.currentDate)
+		m.weekLoading = true
+		m.clearStatusMessage()
+		return m, fetchWeekEntriesCmd(m.harvestClient, m.weekStart)
 
 	case key.Matches(msg, keys.New):
 		if len(m.projectsWithTasks) > 0 {

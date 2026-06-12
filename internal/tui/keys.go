@@ -15,6 +15,7 @@ type KeyMap struct {
 	PrevDay key.Binding
 	NextDay key.Binding
 	Today   key.Binding
+	Week    key.Binding
 
 	// Time entry actions
 	New       key.Binding
@@ -69,6 +70,10 @@ func DefaultKeyMap() KeyMap {
 		Today: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "jump to today"),
+		),
+		Week: key.NewBinding(
+			key.WithKeys("w"),
+			key.WithHelp("w", "weekly summary"),
 		),
 
 		// Time entry actions
@@ -135,7 +140,7 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 // ListViewHelp returns help specific to the list view.
 func (k KeyMap) ListViewHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.PrevDay, k.NextDay, k.Today},
+		{k.Up, k.Down, k.PrevDay, k.NextDay, k.Today, k.Week},
 		{k.New, k.Edit, k.Delete, k.StartStop},
 		{k.Help, k.Quit},
 	}

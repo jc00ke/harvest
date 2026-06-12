@@ -940,7 +940,7 @@ func TestFooterKeybindings(t *testing.T) {
 
 		output := model.View()
 
-		expectedKeys := []string{"n", "new", "e", "edit", "s", "start/stop", "d", "delete", "?", "help", "q", "quit"}
+		expectedKeys := []string{"n", "new", "e", "edit", "s", "timer", "d", "del", "w", "week", "?", "help", "q", "quit"}
 		for _, key := range expectedKeys {
 			if !strings.Contains(output, key) {
 				t.Errorf("expected footer to contain %q", key)

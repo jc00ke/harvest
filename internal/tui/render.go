@@ -205,8 +205,9 @@ func listViewFooterKeys() []string {
 	return []string{
 		RenderKeybinding("n", "new"),
 		RenderKeybinding("e", "edit"),
-		RenderKeybinding("s", "start/stop"),
-		RenderKeybinding("d", "delete"),
+		RenderKeybinding("s", "timer"),
+		RenderKeybinding("d", "del"),
+		RenderKeybinding("w", "week"),
 		RenderKeybinding("?", "help"),
 		RenderKeybinding("q", "quit"),
 	}
