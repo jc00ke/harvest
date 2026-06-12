@@ -4,16 +4,13 @@ A terminal-based time tracking application that connects to the [Harvest API v2]
 
 [Planet Argon](https://www.planetargon.com) has been a long-time customer of Harvest and our software engineers wanted to build a tool for tracking client billables from the command line. This is an open source project that integrates with the Harvest API — there is no collaboration with or endorsement by either party.
 
-### Time Sheet view
+## Time Sheet view
 
 <img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/c2700762-410e-41f5-9a50-d28836ff7242" />
-
 
 ### Add/Edit Time Entry
 
 <img width="807" height="611" alt="image" src="https://github.com/user-attachments/assets/7d7c8537-c668-4c77-8692-42472ccaa889" />
-
-
 
 ### Help Menu
 
@@ -49,14 +46,16 @@ Otherwise, you can run it directly with `~/go/bin/harvest-tui`.
 ### Build from Source
 
 1. Clone this repository:
+
    ```bash
    git clone https://github.com/planetargon/harvest-tui.git
    cd harvest-tui
    ```
 
 2. Build the application:
+
    ```bash
-   make build
+   mise run build
    ```
 
 The binary will be created at `bin/harvest-tui`.
@@ -66,9 +65,10 @@ The binary will be created at `bin/harvest-tui`.
 - **Release binary:** Download the latest version from the [Releases page](https://github.com/planetargon/harvest-tui/releases) and replace the existing binary.
 - **Go install:** Run `go install github.com/planetargon/harvest-tui/cmd/harvest-tui@latest` again.
 - **Build from source:** Pull the latest changes and rebuild:
+
   ```bash
   git pull
-  make build
+  mise run build
   ```
 
 ## Configuration
@@ -80,24 +80,20 @@ The binary will be created at `bin/harvest-tui`.
 3. Create a new Personal Access Token
 4. Note your Account ID and Access Token
 
-### Setup Config File
+### Storing Credentials
 
-1. Copy the example config:
-   ```bash
-   mkdir -p ~/.config/harvest-tui
-   cp config.example.toml ~/.config/harvest-tui/config.toml
-   ```
+Store your credentials in the OS keyring:
 
-2. Edit `~/.config/harvest-tui/config.toml` with your credentials:
-   ```toml
-   [harvest]
-   account_id = "YOUR_ACCOUNT_ID"
-   access_token = "YOUR_ACCESS_TOKEN"
-   ```
+```bash
+harvest-cli auth login
+```
+
+You'll be prompted for your Account ID and Access Token. Use `harvest-cli auth status` to verify, and `harvest-cli auth logout` to remove them.
 
 ## Usage
 
 Launch the application:
+
 ```bash
 harvest-tui
 ```
@@ -105,6 +101,7 @@ harvest-tui
 ### Keybindings
 
 #### Navigation
+
 | Key | Action |
 |-----|--------|
 | `↑` / `k` | Move selection up |
@@ -114,6 +111,7 @@ harvest-tui
 | `t` | Jump to today |
 
 #### Time Entry Actions
+
 | Key | Action |
 |-----|--------|
 | `n` | Create new time entry |
@@ -122,6 +120,7 @@ harvest-tui
 | `s` | Start/stop timer on selected entry |
 
 #### General
+
 | Key | Action |
 |-----|--------|
 | `?` | Toggle help overlay |
@@ -131,18 +130,21 @@ harvest-tui
 ## Development
 
 ### Running Tests
+
 ```bash
-make test
+mise run test
 ```
 
 ### Building Locally
+
 ```bash
-make build
+mise run build
 ```
 
 ### Full Check (Format, Lint, Test)
+
 ```bash
-make check
+mise run check
 ```
 
 ## Disclaimer
