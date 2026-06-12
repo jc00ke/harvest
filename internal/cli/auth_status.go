@@ -10,15 +10,13 @@ import (
 
 // authStatus is the JSON shape returned by `auth status --json`.
 type authStatus struct {
-	ActiveSource string            `json:"active_source"` // "keyring", "file", or "none"
+	ActiveSource string            `json:"active_source"` // "keyring" or "none"
 	Keyring      authSourceDetails `json:"keyring"`
-	File         authSourceDetails `json:"file"`
 }
 
 type authSourceDetails struct {
 	Present   bool   `json:"present"`
 	AccountID string `json:"account_id,omitempty"`
-	Path      string `json:"path,omitempty"` // only set for the file source
 	Error     string `json:"error,omitempty"`
 }
 
@@ -40,18 +38,8 @@ func buildAuthStatus() authStatus {
 	if cfg, err := config.LoadFromKeyring(); err == nil {
 		status.Keyring = authSourceDetails{Present: true, AccountID: cfg.Harvest.AccountID}
 		status.ActiveSource = "keyring"
-	}
-
-	path, _ := config.ConfigFilePath()
-	status.File.Path = path
-	if cfg, err := config.LoadFromFile(); err == nil {
-		status.File.Present = true
-		status.File.AccountID = cfg.Harvest.AccountID
-		if status.ActiveSource == "none" {
-			status.ActiveSource = "file"
-		}
 	} else {
-		status.File.Error = err.Error()
+		status.Keyring.Error = err.Error()
 	}
 
 	return status
@@ -67,11 +55,6 @@ func renderAuthStatus(w io.Writer, status authStatus) error {
 		status.Keyring.Present,
 		valueOrDash(status.Keyring.AccountID),
 		activeMarker(status.ActiveSource == "keyring"),
-	)
-	fmt.Fprintf(tw, "file\t%t\t%s\t%s\n",
-		status.File.Present,
-		valueOrDash(status.File.AccountID),
-		fileDetail(status),
 	)
 	if err := tw.Flush(); err != nil {
 		return err
@@ -95,15 +78,4 @@ func activeMarker(active bool) string {
 		return "active"
 	}
 	return ""
-}
-
-func fileDetail(status authStatus) string {
-	if status.File.Present {
-		marker := status.File.Path
-		if status.ActiveSource == "file" {
-			marker = "active: " + marker
-		}
-		return marker
-	}
-	return status.File.Path
 }
