@@ -2,6 +2,7 @@ package harvest
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -228,27 +229,27 @@ func (c *Client) GetUserID() int {
 }
 
 // Get performs a GET request to the specified path.
-func (c *Client) Get(path string) (*http.Response, error) {
-	return c.doRequest(http.MethodGet, path, nil)
+func (c *Client) Get(ctx context.Context, path string) (*http.Response, error) {
+	return c.doRequest(ctx, http.MethodGet, path, nil)
 }
 
 // Post performs a POST request to the specified path with the given body.
-func (c *Client) Post(path string, body any) (*http.Response, error) {
-	return c.doRequest(http.MethodPost, path, body)
+func (c *Client) Post(ctx context.Context, path string, body any) (*http.Response, error) {
+	return c.doRequest(ctx, http.MethodPost, path, body)
 }
 
 // Patch performs a PATCH request to the specified path with the given body.
-func (c *Client) Patch(path string, body any) (*http.Response, error) {
-	return c.doRequest(http.MethodPatch, path, body)
+func (c *Client) Patch(ctx context.Context, path string, body any) (*http.Response, error) {
+	return c.doRequest(ctx, http.MethodPatch, path, body)
 }
 
 // Delete performs a DELETE request to the specified path.
-func (c *Client) Delete(path string) (*http.Response, error) {
-	return c.doRequest(http.MethodDelete, path, nil)
+func (c *Client) Delete(ctx context.Context, path string) (*http.Response, error) {
+	return c.doRequest(ctx, http.MethodDelete, path, nil)
 }
 
 // doRequest performs an HTTP request with the appropriate headers.
-func (c *Client) doRequest(method, path string, body any) (*http.Response, error) {
+func (c *Client) doRequest(ctx context.Context, method, path string, body any) (*http.Response, error) {
 	url := c.baseURL + path
 
 	var bodyReader io.Reader
@@ -260,7 +261,7 @@ func (c *Client) doRequest(method, path string, body any) (*http.Response, error
 		bodyReader = bytes.NewReader(jsonData)
 	}
 
-	req, err := http.NewRequest(method, url, bodyReader)
+	req, err := http.NewRequestWithContext(ctx, method, url, bodyReader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -321,8 +322,8 @@ func errorMessage(resp *http.Response) string {
 // ValidateAuth validates the credentials by calling GET /v2/users/me.
 // Returns the authenticated user on success and stores the user ID.
 // API Reference: https://help.getharvest.com/api-v2/users-api/users/users/#retrieve-the-currently-authenticated-user
-func (c *Client) ValidateAuth() (*User, error) {
-	resp, err := c.Get("/v2/users/me")
+func (c *Client) ValidateAuth(ctx context.Context) (*User, error) {
+	resp, err := c.Get(ctx, "/v2/users/me")
 	if err != nil {
 		return nil, fmt.Errorf("network request failed: %w", err)
 	}
@@ -346,13 +347,13 @@ func (c *Client) ValidateAuth() (*User, error) {
 // FetchProjects retrieves all active projects the user has access to.
 // Handles pagination automatically.
 // API Reference: https://help.getharvest.com/api-v2/projects-api/projects/projects/
-func (c *Client) FetchProjects() ([]Project, error) {
+func (c *Client) FetchProjects(ctx context.Context) ([]Project, error) {
 	var allProjects []Project
 	page := 1
 
 	for {
 		path := fmt.Sprintf("/v2/projects?is_active=true&page=%d", page)
-		resp, err := c.Get(path)
+		resp, err := c.Get(ctx, path)
 		if err != nil {
 			return nil, fmt.Errorf("network request failed: %w", err)
 		}
@@ -385,13 +386,13 @@ func (c *Client) FetchProjects() ([]Project, error) {
 // FetchTaskAssignments retrieves all active task assignments.
 // Handles pagination automatically.
 // API Reference: https://help.getharvest.com/api-v2/projects-api/projects/task-assignments/
-func (c *Client) FetchTaskAssignments() ([]TaskAssignment, error) {
+func (c *Client) FetchTaskAssignments(ctx context.Context) ([]TaskAssignment, error) {
 	var allTaskAssignments []TaskAssignment
 	page := 1
 
 	for {
 		path := fmt.Sprintf("/v2/task_assignments?is_active=true&page=%d", page)
-		resp, err := c.Get(path)
+		resp, err := c.Get(ctx, path)
 		if err != nil {
 			return nil, fmt.Errorf("network request failed: %w", err)
 		}
@@ -425,14 +426,14 @@ func (c *Client) FetchTaskAssignments() ([]TaskAssignment, error) {
 // [from, to]. Both parameters should be in YYYY-MM-DD format; pass the same
 // value for both to fetch a single day. Handles pagination automatically.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
-func (c *Client) FetchTimeEntries(from, to string) ([]TimeEntry, error) {
+func (c *Client) FetchTimeEntries(ctx context.Context, from, to string) ([]TimeEntry, error) {
 	var allTimeEntries []TimeEntry
 	page := 1
 
 	for {
 		// Filter by user_id to only get current user's entries
 		path := fmt.Sprintf("/v2/time_entries?from=%s&to=%s&user_id=%d&page=%d", from, to, c.userID, page)
-		resp, err := c.Get(path)
+		resp, err := c.Get(ctx, path)
 		if err != nil {
 			return nil, fmt.Errorf("network request failed: %w", err)
 		}
@@ -464,8 +465,8 @@ func (c *Client) FetchTimeEntries(from, to string) ([]TimeEntry, error) {
 
 // CreateTimeEntry creates a new time entry in Harvest.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
-func (c *Client) CreateTimeEntry(request CreateTimeEntryRequest) (*TimeEntry, error) {
-	resp, err := c.Post("/v2/time_entries", request)
+func (c *Client) CreateTimeEntry(ctx context.Context, request CreateTimeEntryRequest) (*TimeEntry, error) {
+	resp, err := c.Post(ctx, "/v2/time_entries", request)
 	if err != nil {
 		return nil, fmt.Errorf("network request failed: %w", err)
 	}
@@ -485,9 +486,9 @@ func (c *Client) CreateTimeEntry(request CreateTimeEntryRequest) (*TimeEntry, er
 
 // UpdateTimeEntry updates an existing time entry in Harvest.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
-func (c *Client) UpdateTimeEntry(id int, request UpdateTimeEntryRequest) (*TimeEntry, error) {
+func (c *Client) UpdateTimeEntry(ctx context.Context, id int, request UpdateTimeEntryRequest) (*TimeEntry, error) {
 	path := fmt.Sprintf("/v2/time_entries/%d", id)
-	resp, err := c.Patch(path, request)
+	resp, err := c.Patch(ctx, path, request)
 	if err != nil {
 		return nil, fmt.Errorf("network request failed: %w", err)
 	}
@@ -507,9 +508,9 @@ func (c *Client) UpdateTimeEntry(id int, request UpdateTimeEntryRequest) (*TimeE
 
 // DeleteTimeEntry deletes an existing time entry in Harvest.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
-func (c *Client) DeleteTimeEntry(id int) error {
+func (c *Client) DeleteTimeEntry(ctx context.Context, id int) error {
 	path := fmt.Sprintf("/v2/time_entries/%d", id)
-	resp, err := c.Delete(path)
+	resp, err := c.Delete(ctx, path)
 	if err != nil {
 		return fmt.Errorf("network request failed: %w", err)
 	}
@@ -524,9 +525,9 @@ func (c *Client) DeleteTimeEntry(id int) error {
 
 // RestartTimeEntry restarts (starts the timer for) an existing time entry in Harvest.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
-func (c *Client) RestartTimeEntry(id int) (*TimeEntry, error) {
+func (c *Client) RestartTimeEntry(ctx context.Context, id int) (*TimeEntry, error) {
 	path := fmt.Sprintf("/v2/time_entries/%d/restart", id)
-	resp, err := c.Patch(path, nil)
+	resp, err := c.Patch(ctx, path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("network request failed: %w", err)
 	}
@@ -546,9 +547,9 @@ func (c *Client) RestartTimeEntry(id int) (*TimeEntry, error) {
 
 // StopTimeEntry stops the timer for an existing time entry in Harvest.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
-func (c *Client) StopTimeEntry(id int) (*TimeEntry, error) {
+func (c *Client) StopTimeEntry(ctx context.Context, id int) (*TimeEntry, error) {
 	path := fmt.Sprintf("/v2/time_entries/%d/stop", id)
-	resp, err := c.Patch(path, nil)
+	resp, err := c.Patch(ctx, path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("network request failed: %w", err)
 	}

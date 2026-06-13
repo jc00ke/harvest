@@ -35,11 +35,11 @@ func newEntriesListCommand() *cobra.Command {
 				t, _ := time.Parse(dateFormat, from)
 				to = t.AddDate(0, 0, 6).Format(dateFormat)
 			}
-			client, _, err := authedClient()
+			client, _, err := authedClient(cmd.Context())
 			if err != nil {
 				return err
 			}
-			entries, err := client.FetchTimeEntries(from, to)
+			entries, err := client.FetchTimeEntries(cmd.Context(), from, to)
 			if err != nil {
 				return err
 			}

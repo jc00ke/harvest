@@ -20,15 +20,15 @@ func newProjectsListCommand() *cobra.Command {
 		Short: "List active projects with their available tasks",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			client, _, err := authedClient()
+			client, _, err := authedClient(cmd.Context())
 			if err != nil {
 				return err
 			}
-			projects, err := client.FetchProjects()
+			projects, err := client.FetchProjects(cmd.Context())
 			if err != nil {
 				return err
 			}
-			assignments, err := client.FetchTaskAssignments()
+			assignments, err := client.FetchTaskAssignments(cmd.Context())
 			if err != nil {
 				return err
 			}

@@ -21,7 +21,7 @@ func newTestClient(t *testing.T) *harvest.Client {
 func TestValidateAuthReturnsDemoUser(t *testing.T) {
 	client := newTestClient(t)
 
-	user, err := client.ValidateAuth()
+	user, err := client.ValidateAuth(t.Context())
 	if err != nil {
 		t.Fatalf("ValidateAuth() error: %v", err)
 	}
@@ -33,7 +33,7 @@ func TestValidateAuthReturnsDemoUser(t *testing.T) {
 func TestFetchProjects(t *testing.T) {
 	client := newTestClient(t)
 
-	projects, err := client.FetchProjects()
+	projects, err := client.FetchProjects(t.Context())
 	if err != nil {
 		t.Fatalf("FetchProjects() error: %v", err)
 	}
@@ -45,11 +45,11 @@ func TestFetchProjects(t *testing.T) {
 func TestFetchTaskAssignmentsCoverEveryProject(t *testing.T) {
 	client := newTestClient(t)
 
-	projects, err := client.FetchProjects()
+	projects, err := client.FetchProjects(t.Context())
 	if err != nil {
 		t.Fatalf("FetchProjects() error: %v", err)
 	}
-	assignments, err := client.FetchTaskAssignments()
+	assignments, err := client.FetchTaskAssignments(t.Context())
 	if err != nil {
 		t.Fatalf("FetchTaskAssignments() error: %v", err)
 	}
@@ -62,11 +62,11 @@ func TestFetchTaskAssignmentsCoverEveryProject(t *testing.T) {
 
 func TestFetchTimeEntriesForSeedDate(t *testing.T) {
 	client := newTestClient(t)
-	if _, err := client.ValidateAuth(); err != nil {
+	if _, err := client.ValidateAuth(t.Context()); err != nil {
 		t.Fatalf("ValidateAuth() error: %v", err)
 	}
 
-	entries, err := client.FetchTimeEntries("2026-06-12", "2026-06-12")
+	entries, err := client.FetchTimeEntries(t.Context(), "2026-06-12", "2026-06-12")
 	if err != nil {
 		t.Fatalf("FetchTimeEntries() error: %v", err)
 	}
@@ -87,11 +87,11 @@ func TestFetchTimeEntriesForSeedDate(t *testing.T) {
 
 func TestFetchTimeEntriesFiltersByDateRange(t *testing.T) {
 	client := newTestClient(t)
-	if _, err := client.ValidateAuth(); err != nil {
+	if _, err := client.ValidateAuth(t.Context()); err != nil {
 		t.Fatalf("ValidateAuth() error: %v", err)
 	}
 
-	entries, err := client.FetchTimeEntries("2020-01-01", "2020-01-01")
+	entries, err := client.FetchTimeEntries(t.Context(), "2020-01-01", "2020-01-01")
 	if err != nil {
 		t.Fatalf("FetchTimeEntries() error: %v", err)
 	}
@@ -102,15 +102,15 @@ func TestFetchTimeEntriesFiltersByDateRange(t *testing.T) {
 
 func TestCreateTimeEntryResolvesNamesAndPersists(t *testing.T) {
 	client := newTestClient(t)
-	if _, err := client.ValidateAuth(); err != nil {
+	if _, err := client.ValidateAuth(t.Context()); err != nil {
 		t.Fatalf("ValidateAuth() error: %v", err)
 	}
 
-	projects, err := client.FetchProjects()
+	projects, err := client.FetchProjects(t.Context())
 	if err != nil {
 		t.Fatalf("FetchProjects() error: %v", err)
 	}
-	assignments, err := client.FetchTaskAssignments()
+	assignments, err := client.FetchTaskAssignments(t.Context())
 	if err != nil {
 		t.Fatalf("FetchTaskAssignments() error: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestCreateTimeEntryResolvesNamesAndPersists(t *testing.T) {
 	project := combined[0].Project
 	task := combined[0].Tasks[0]
 
-	created, err := client.CreateTimeEntry(harvest.CreateTimeEntryRequest{
+	created, err := client.CreateTimeEntry(t.Context(), harvest.CreateTimeEntryRequest{
 		ProjectID: project.ID,
 		TaskID:    task.ID,
 		SpentDate: "2026-06-12",
@@ -138,7 +138,7 @@ func TestCreateTimeEntryResolvesNamesAndPersists(t *testing.T) {
 		t.Errorf("created.Client.Name=%s, want=%s", got, want)
 	}
 
-	entries, err := client.FetchTimeEntries("2026-06-12", "2026-06-12")
+	entries, err := client.FetchTimeEntries(t.Context(), "2026-06-12", "2026-06-12")
 	if err != nil {
 		t.Fatalf("FetchTimeEntries() error: %v", err)
 	}
@@ -150,7 +150,7 @@ func TestCreateTimeEntryResolvesNamesAndPersists(t *testing.T) {
 func TestCreateTimeEntryRejectsUnknownProject(t *testing.T) {
 	client := newTestClient(t)
 
-	_, err := client.CreateTimeEntry(harvest.CreateTimeEntryRequest{
+	_, err := client.CreateTimeEntry(t.Context(), harvest.CreateTimeEntryRequest{
 		ProjectID: 999999,
 		TaskID:    1,
 		SpentDate: "2026-06-12",
@@ -163,18 +163,18 @@ func TestCreateTimeEntryRejectsUnknownProject(t *testing.T) {
 
 func TestUpdateTimeEntry(t *testing.T) {
 	client := newTestClient(t)
-	if _, err := client.ValidateAuth(); err != nil {
+	if _, err := client.ValidateAuth(t.Context()); err != nil {
 		t.Fatalf("ValidateAuth() error: %v", err)
 	}
 
-	entries, err := client.FetchTimeEntries("2026-06-12", "2026-06-12")
+	entries, err := client.FetchTimeEntries(t.Context(), "2026-06-12", "2026-06-12")
 	if err != nil {
 		t.Fatalf("FetchTimeEntries() error: %v", err)
 	}
 
 	notes := "Updated notes"
 	hours := 2.25
-	updated, err := client.UpdateTimeEntry(entries[0].ID, harvest.UpdateTimeEntryRequest{
+	updated, err := client.UpdateTimeEntry(t.Context(), entries[0].ID, harvest.UpdateTimeEntryRequest{
 		Notes: &notes,
 		Hours: &hours,
 	})
@@ -191,21 +191,21 @@ func TestUpdateTimeEntry(t *testing.T) {
 
 func TestDeleteTimeEntry(t *testing.T) {
 	client := newTestClient(t)
-	if _, err := client.ValidateAuth(); err != nil {
+	if _, err := client.ValidateAuth(t.Context()); err != nil {
 		t.Fatalf("ValidateAuth() error: %v", err)
 	}
 
-	entries, err := client.FetchTimeEntries("2026-06-12", "2026-06-12")
+	entries, err := client.FetchTimeEntries(t.Context(), "2026-06-12", "2026-06-12")
 	if err != nil {
 		t.Fatalf("FetchTimeEntries() error: %v", err)
 	}
 	before := len(entries)
 
-	if err := client.DeleteTimeEntry(entries[0].ID); err != nil {
+	if err := client.DeleteTimeEntry(t.Context(), entries[0].ID); err != nil {
 		t.Fatalf("DeleteTimeEntry() error: %v", err)
 	}
 
-	entries, err = client.FetchTimeEntries("2026-06-12", "2026-06-12")
+	entries, err = client.FetchTimeEntries(t.Context(), "2026-06-12", "2026-06-12")
 	if err != nil {
 		t.Fatalf("FetchTimeEntries() error: %v", err)
 	}
@@ -216,11 +216,11 @@ func TestDeleteTimeEntry(t *testing.T) {
 
 func TestRestartAndStopTimeEntry(t *testing.T) {
 	client := newTestClient(t)
-	if _, err := client.ValidateAuth(); err != nil {
+	if _, err := client.ValidateAuth(t.Context()); err != nil {
 		t.Fatalf("ValidateAuth() error: %v", err)
 	}
 
-	entries, err := client.FetchTimeEntries("2026-06-12", "2026-06-12")
+	entries, err := client.FetchTimeEntries(t.Context(), "2026-06-12", "2026-06-12")
 	if err != nil {
 		t.Fatalf("FetchTimeEntries() error: %v", err)
 	}
@@ -232,7 +232,7 @@ func TestRestartAndStopTimeEntry(t *testing.T) {
 		}
 	}
 
-	restarted, err := client.RestartTimeEntry(stopped.ID)
+	restarted, err := client.RestartTimeEntry(t.Context(), stopped.ID)
 	if err != nil {
 		t.Fatalf("RestartTimeEntry() error: %v", err)
 	}
@@ -240,7 +240,7 @@ func TestRestartAndStopTimeEntry(t *testing.T) {
 		t.Errorf("restarted.IsRunning=%t, want=%t", got, want)
 	}
 
-	halted, err := client.StopTimeEntry(stopped.ID)
+	halted, err := client.StopTimeEntry(t.Context(), stopped.ID)
 	if err != nil {
 		t.Fatalf("StopTimeEntry() error: %v", err)
 	}

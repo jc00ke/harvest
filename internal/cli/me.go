@@ -8,7 +8,7 @@ func newMeCommand() *cobra.Command {
 		Short: "Show the authenticated Harvest user",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			_, user, err := authedClient()
+			_, user, err := authedClient(cmd.Context())
 			if err != nil {
 				return err
 			}

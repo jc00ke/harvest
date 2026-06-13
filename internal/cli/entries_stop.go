@@ -12,11 +12,11 @@ func newEntriesStopCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			client, _, err := authedClient()
+			client, _, err := authedClient(cmd.Context())
 			if err != nil {
 				return err
 			}
-			entry, err := client.StopTimeEntry(id)
+			entry, err := client.StopTimeEntry(cmd.Context(), id)
 			if err != nil {
 				return err
 			}

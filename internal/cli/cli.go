@@ -3,8 +3,12 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/jc00ke/harvest/internal/config"
 	"github.com/jc00ke/harvest/internal/harvest"
@@ -37,9 +41,12 @@ func NewRootCommand() *cobra.Command {
 	return root
 }
 
-// Execute runs the root command and returns its exit code.
+// Execute runs the root command and returns its exit code. Ctrl-C or
+// SIGTERM cancels the command's context so in-flight API requests abort.
 func Execute() int {
-	if err := NewRootCommand().Execute(); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if err := NewRootCommand().ExecuteContext(ctx); err != nil {
 		// Cobra already prints the error via SilenceErrors=false.
 		return 1
 	}
@@ -53,13 +60,13 @@ var newAPIClient = harvest.NewClient
 // authedClient loads credentials from the OS keyring, constructs a Harvest
 // client, and validates the credentials. It is invoked from each command's
 // RunE so that --help works without requiring credentials.
-func authedClient() (*harvest.Client, *harvest.User, error) {
+func authedClient(ctx context.Context) (*harvest.Client, *harvest.User, error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return nil, nil, err
 	}
 	client := newAPIClient(cfg.Harvest.AccountID, cfg.Harvest.AccessToken)
-	user, err := client.ValidateAuth()
+	user, err := client.ValidateAuth(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("authentication failed: %w", err)
 	}

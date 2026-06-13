@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"context"
 	"sort"
 	"strings"
 	"time"
@@ -22,7 +23,7 @@ func fetchWeekEntriesCmd(client *harvest.Client, weekStart time.Time) tea.Cmd {
 	return func() tea.Msg {
 		from := weekStart.Format("2006-01-02")
 		to := weekStart.AddDate(0, 0, 6).Format("2006-01-02")
-		entries, err := client.FetchTimeEntries(from, to)
+		entries, err := client.FetchTimeEntries(context.Background(), from, to)
 		return weekEntriesFetchedMsg{entries: entries, err: err}
 	}
 }

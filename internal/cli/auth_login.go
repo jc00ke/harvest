@@ -31,7 +31,7 @@ Credentials may also be supplied non-interactively via --account-id and
 			}
 
 			client := newAPIClient(accountID, accessToken)
-			user, err := client.ValidateAuth()
+			user, err := client.ValidateAuth(cmd.Context())
 			if err != nil {
 				return fmt.Errorf("authentication failed: %w", err)
 			}

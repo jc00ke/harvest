@@ -16,11 +16,11 @@ func newEntriesDeleteCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			client, _, err := authedClient()
+			client, _, err := authedClient(cmd.Context())
 			if err != nil {
 				return err
 			}
-			if err := client.DeleteTimeEntry(id); err != nil {
+			if err := client.DeleteTimeEntry(cmd.Context(), id); err != nil {
 				return err
 			}
 			return renderMessage(out(cmd), fmt.Sprintf("Deleted time entry %d", id))

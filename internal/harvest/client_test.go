@@ -1,7 +1,9 @@
 package harvest
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -45,7 +47,7 @@ func TestValidateAuth(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		user, err := client.ValidateAuth()
+		user, err := client.ValidateAuth(t.Context())
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -77,7 +79,7 @@ func TestValidateAuth(t *testing.T) {
 		client := NewClient("12345", "invalid-token")
 		client.SetBaseURL(server.URL)
 
-		user, err := client.ValidateAuth()
+		user, err := client.ValidateAuth(t.Context())
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -100,7 +102,7 @@ func TestValidateAuth(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		user, err := client.ValidateAuth()
+		user, err := client.ValidateAuth(t.Context())
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -124,7 +126,7 @@ func TestValidateAuth(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		user, err := client.ValidateAuth()
+		user, err := client.ValidateAuth(t.Context())
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -150,7 +152,7 @@ func TestValidateAuth(t *testing.T) {
 			Timeout: 10 * time.Millisecond,
 		})
 
-		user, err := client.ValidateAuth()
+		user, err := client.ValidateAuth(t.Context())
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -218,7 +220,7 @@ func TestFetchProjects(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		projects, err := client.FetchProjects()
+		projects, err := client.FetchProjects(t.Context())
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -267,7 +269,7 @@ func TestFetchProjects(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		projects, err := client.FetchProjects()
+		projects, err := client.FetchProjects(t.Context())
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -315,7 +317,7 @@ func TestFetchProjects(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		projects, err := client.FetchProjects()
+		projects, err := client.FetchProjects(t.Context())
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -399,7 +401,7 @@ func TestFetchTaskAssignments(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		taskAssignments, err := client.FetchTaskAssignments()
+		taskAssignments, err := client.FetchTaskAssignments(t.Context())
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -443,7 +445,7 @@ func TestFetchTaskAssignments(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		taskAssignments, err := client.FetchTaskAssignments()
+		taskAssignments, err := client.FetchTaskAssignments(t.Context())
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -491,7 +493,7 @@ func TestFetchTaskAssignments(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		taskAssignments, err := client.FetchTaskAssignments()
+		taskAssignments, err := client.FetchTaskAssignments(t.Context())
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -607,7 +609,7 @@ func TestFetchTimeEntries(t *testing.T) {
 		client.SetBaseURL(server.URL)
 		client.SetUserID(123) // Set user ID for testing
 
-		entries, err := client.FetchTimeEntries("2025-01-15", "2025-01-15")
+		entries, err := client.FetchTimeEntries(t.Context(), "2025-01-15", "2025-01-15")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -668,7 +670,7 @@ func TestFetchTimeEntries(t *testing.T) {
 		client.SetBaseURL(server.URL)
 		client.SetUserID(123) // Set user ID for testing
 
-		entries, err := client.FetchTimeEntries("2025-01-15", "2025-01-15")
+		entries, err := client.FetchTimeEntries(t.Context(), "2025-01-15", "2025-01-15")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -717,7 +719,7 @@ func TestFetchTimeEntries(t *testing.T) {
 		client.SetBaseURL(server.URL)
 		client.SetUserID(123) // Set user ID for testing
 
-		entries, err := client.FetchTimeEntries("2025-01-15", "2025-01-15")
+		entries, err := client.FetchTimeEntries(t.Context(), "2025-01-15", "2025-01-15")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -804,7 +806,7 @@ func TestCreateTimeEntry(t *testing.T) {
 			Notes:     "Code review session",
 		}
 
-		created, err := client.CreateTimeEntry(entry)
+		created, err := client.CreateTimeEntry(t.Context(), entry)
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -867,7 +869,7 @@ func TestCreateTimeEntry(t *testing.T) {
 			IsBillable: &[]bool{false}[0],
 		}
 
-		created, err := client.CreateTimeEntry(entry)
+		created, err := client.CreateTimeEntry(t.Context(), entry)
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -896,7 +898,7 @@ func TestCreateTimeEntry(t *testing.T) {
 			Hours:     1.0,
 		}
 
-		created, err := client.CreateTimeEntry(entry)
+		created, err := client.CreateTimeEntry(t.Context(), entry)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -928,7 +930,7 @@ func TestCreateTimeEntry(t *testing.T) {
 			Hours:     1.0,
 		}
 
-		created, err := client.CreateTimeEntry(entry)
+		created, err := client.CreateTimeEntry(t.Context(), entry)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1009,7 +1011,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 			Notes: &[]string{"Updated notes"}[0],
 		}
 
-		updated, err := client.UpdateTimeEntry(entryID, update)
+		updated, err := client.UpdateTimeEntry(t.Context(), entryID, update)
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -1056,7 +1058,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 			IsBillable: &[]bool{true}[0],
 		}
 
-		updated, err := client.UpdateTimeEntry(entryID, update)
+		updated, err := client.UpdateTimeEntry(t.Context(), entryID, update)
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -1084,7 +1086,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 			Hours: &[]float64{2.0}[0],
 		}
 
-		updated, err := client.UpdateTimeEntry(entryID, update)
+		updated, err := client.UpdateTimeEntry(t.Context(), entryID, update)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1115,7 +1117,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 			Hours: &[]float64{2.0}[0],
 		}
 
-		updated, err := client.UpdateTimeEntry(entryID, update)
+		updated, err := client.UpdateTimeEntry(t.Context(), entryID, update)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1145,7 +1147,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 			Hours: &[]float64{2.0}[0],
 		}
 
-		updated, err := client.UpdateTimeEntry(entryID, update)
+		updated, err := client.UpdateTimeEntry(t.Context(), entryID, update)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1186,7 +1188,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		err := client.DeleteTimeEntry(entryID)
+		err := client.DeleteTimeEntry(t.Context(), entryID)
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -1206,7 +1208,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		err := client.DeleteTimeEntry(entryID)
+		err := client.DeleteTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1230,7 +1232,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		err := client.DeleteTimeEntry(entryID)
+		err := client.DeleteTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1254,7 +1256,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		err := client.DeleteTimeEntry(entryID)
+		err := client.DeleteTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1277,7 +1279,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		client := NewClient("12345", "invalid-token")
 		client.SetBaseURL(server.URL)
 
-		err := client.DeleteTimeEntry(entryID)
+		err := client.DeleteTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1336,7 +1338,7 @@ func TestRestartTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		entry, err := client.RestartTimeEntry(entryID)
+		entry, err := client.RestartTimeEntry(t.Context(), entryID)
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -1363,7 +1365,7 @@ func TestRestartTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		entry, err := client.RestartTimeEntry(entryID)
+		entry, err := client.RestartTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1390,7 +1392,7 @@ func TestRestartTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		entry, err := client.RestartTimeEntry(entryID)
+		entry, err := client.RestartTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1452,7 +1454,7 @@ func TestStopTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		entry, err := client.StopTimeEntry(entryID)
+		entry, err := client.StopTimeEntry(t.Context(), entryID)
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -1482,7 +1484,7 @@ func TestStopTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		entry, err := client.StopTimeEntry(entryID)
+		entry, err := client.StopTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1509,7 +1511,7 @@ func TestStopTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		entry, err := client.StopTimeEntry(entryID)
+		entry, err := client.StopTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1536,7 +1538,7 @@ func TestStopTimeEntry(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		entry, err := client.StopTimeEntry(entryID)
+		entry, err := client.StopTimeEntry(t.Context(), entryID)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1682,7 +1684,7 @@ func TestAPIErrorsIncludeResponseBody(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		_, err := client.CreateTimeEntry(CreateTimeEntryRequest{ProjectID: 1, TaskID: 2, SpentDate: "2026-06-12", Hours: 1.5})
+		_, err := client.CreateTimeEntry(t.Context(), CreateTimeEntryRequest{ProjectID: 1, TaskID: 2, SpentDate: "2026-06-12", Hours: 1.5})
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1705,7 +1707,7 @@ func TestAPIErrorsIncludeResponseBody(t *testing.T) {
 		client := NewClient("12345", "invalid-token")
 		client.SetBaseURL(server.URL)
 
-		_, err := client.ValidateAuth()
+		_, err := client.ValidateAuth(t.Context())
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1724,7 +1726,7 @@ func TestAPIErrorsIncludeResponseBody(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		err := client.DeleteTimeEntry(123)
+		err := client.DeleteTimeEntry(t.Context(), 123)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1742,7 +1744,7 @@ func TestAPIErrorsIncludeResponseBody(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		_, err := client.StopTimeEntry(123)
+		_, err := client.StopTimeEntry(t.Context(), 123)
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
@@ -1764,12 +1766,57 @@ func TestAPIErrorsIncludeResponseBody(t *testing.T) {
 		client := NewClient("12345", "test-token")
 		client.SetBaseURL(server.URL)
 
-		_, err := client.FetchProjects()
+		_, err := client.FetchProjects(t.Context())
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}
 		if got, want := err.Error(), "failed to fetch projects with status 403: The object you requested was not found"; got != want {
 			t.Errorf("error=%q, want=%q", got, want)
+		}
+	})
+}
+
+func TestContextCancellation(t *testing.T) {
+	t.Run("given a cancelled context when FetchProjects called then returns context error", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		ctx, cancel := context.WithCancel(t.Context())
+		cancel()
+
+		_, err := client.FetchProjects(ctx)
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err, context.Canceled; !errors.Is(got, want) {
+			t.Errorf("error=%v, want %v", got, want)
+		}
+	})
+
+	t.Run("given an expired context deadline when CreateTimeEntry called then returns deadline error", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(100 * time.Millisecond)
+			w.WriteHeader(http.StatusCreated)
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		ctx, cancel := context.WithTimeout(t.Context(), 10*time.Millisecond)
+		defer cancel()
+
+		_, err := client.CreateTimeEntry(ctx, CreateTimeEntryRequest{ProjectID: 1, TaskID: 2, SpentDate: "2026-06-12"})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err, context.DeadlineExceeded; !errors.Is(got, want) {
+			t.Errorf("error=%v, want %v", got, want)
 		}
 	})
 }

@@ -38,11 +38,11 @@ func newEntriesCreateCommand() *cobra.Command {
 				req.IsBillable = &b
 			}
 
-			client, _, err := authedClient()
+			client, _, err := authedClient(cmd.Context())
 			if err != nil {
 				return err
 			}
-			entry, err := client.CreateTimeEntry(req)
+			entry, err := client.CreateTimeEntry(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

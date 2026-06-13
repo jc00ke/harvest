@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strconv"
@@ -1573,7 +1574,7 @@ type timeEntryDeletedMsg struct {
 func fetchTimeEntriesCmd(client *harvest.Client, date time.Time) tea.Cmd {
 	return func() tea.Msg {
 		dateStr := date.Format("2006-01-02")
-		entries, err := client.FetchTimeEntries(dateStr, dateStr)
+		entries, err := client.FetchTimeEntries(context.Background(), dateStr, dateStr)
 		return timeEntriesFetchedMsg{entries: entries, err: err}
 	}
 }
@@ -1581,12 +1582,12 @@ func fetchTimeEntriesCmd(client *harvest.Client, date time.Time) tea.Cmd {
 func fetchProjectsWithTasksCmd(client *harvest.Client) tea.Cmd {
 	return func() tea.Msg {
 		// Fetch projects and task assignments, then aggregate them
-		projects, err := client.FetchProjects()
+		projects, err := client.FetchProjects(context.Background())
 		if err != nil {
 			return projectsWithTasksFetchedMsg{err: err}
 		}
 
-		taskAssignments, err := client.FetchTaskAssignments()
+		taskAssignments, err := client.FetchTaskAssignments(context.Background())
 		if err != nil {
 			return projectsWithTasksFetchedMsg{err: err}
 		}
@@ -1598,21 +1599,21 @@ func fetchProjectsWithTasksCmd(client *harvest.Client) tea.Cmd {
 
 func restartTimeEntryCmd(client *harvest.Client, entryID int) tea.Cmd {
 	return func() tea.Msg {
-		entry, err := client.RestartTimeEntry(entryID)
+		entry, err := client.RestartTimeEntry(context.Background(), entryID)
 		return timeEntryStartedMsg{entry: entry, err: err}
 	}
 }
 
 func stopTimeEntryCmd(client *harvest.Client, entryID int) tea.Cmd {
 	return func() tea.Msg {
-		entry, err := client.StopTimeEntry(entryID)
+		entry, err := client.StopTimeEntry(context.Background(), entryID)
 		return timeEntryStoppedMsg{entry: entry, err: err}
 	}
 }
 
 func deleteTimeEntryCmd(client *harvest.Client, entryID int) tea.Cmd {
 	return func() tea.Msg {
-		err := client.DeleteTimeEntry(entryID)
+		err := client.DeleteTimeEntry(context.Background(), entryID)
 		return timeEntryDeletedMsg{entryID: entryID, err: err}
 	}
 }
@@ -1688,7 +1689,7 @@ func (m Model) createTimeEntry() tea.Cmd {
 	}
 
 	return func() tea.Msg {
-		entry, err := m.harvestClient.CreateTimeEntry(request)
+		entry, err := m.harvestClient.CreateTimeEntry(context.Background(), request)
 		if err != nil {
 			return timeEntryCreatedMsg{err: err}
 		}
@@ -1736,7 +1737,7 @@ func (m Model) updateTimeEntry() tea.Cmd {
 	entryID := m.editingEntry.ID
 
 	return func() tea.Msg {
-		entry, err := m.harvestClient.UpdateTimeEntry(entryID, request)
+		entry, err := m.harvestClient.UpdateTimeEntry(context.Background(), entryID, request)
 		if err != nil {
 			return timeEntryUpdatedMsg{err: err}
 		}

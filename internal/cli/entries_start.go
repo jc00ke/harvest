@@ -12,11 +12,11 @@ func newEntriesStartCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			client, _, err := authedClient()
+			client, _, err := authedClient(cmd.Context())
 			if err != nil {
 				return err
 			}
-			entry, err := client.RestartTimeEntry(id)
+			entry, err := client.RestartTimeEntry(cmd.Context(), id)
 			if err != nil {
 				return err
 			}

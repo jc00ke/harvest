@@ -54,11 +54,11 @@ func newEntriesEditCommand() *cobra.Command {
 				req.IsBillable = &b
 			}
 
-			client, _, err := authedClient()
+			client, _, err := authedClient(cmd.Context())
 			if err != nil {
 				return err
 			}
-			entry, err := client.UpdateTimeEntry(id, req)
+			entry, err := client.UpdateTimeEntry(cmd.Context(), id, req)
 			if err != nil {
 				return err
 			}

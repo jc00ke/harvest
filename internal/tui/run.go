@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -35,7 +36,7 @@ func Run(demoMode bool) int {
 	harvestClient := harvest.NewClient(cfg.Harvest.AccountID, cfg.Harvest.AccessToken)
 
 	// Validate authentication before starting the TUI
-	user, err := harvestClient.ValidateAuth()
+	user, err := harvestClient.ValidateAuth(context.Background())
 	if err != nil {
 		fmt.Printf("Authentication failed: %v\n", err)
 		fmt.Println("Please check your Harvest credentials. Run `harvest auth login` to update them.")
@@ -69,7 +70,7 @@ func runDemo() int {
 	harvestClient := harvest.NewClient("demo", "demo")
 	harvestClient.SetBaseURL(server.URL)
 
-	user, err := harvestClient.ValidateAuth()
+	user, err := harvestClient.ValidateAuth(context.Background())
 	if err != nil {
 		fmt.Printf("Error starting demo server: %v\n", err)
 		return 1
