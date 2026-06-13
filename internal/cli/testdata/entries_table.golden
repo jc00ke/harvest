@@ -1,0 +1,4 @@
+ID    DATE        HOURS  STATUS   CLIENT     PROJECT               TASK         NOTES
+1001  2026-06-10  0:30            Acme Corp  Website Redesign      Meetings     Sprint planning
+1002  2026-06-10  2:15   running  Globex     Mobile App            Development  Homepage hero and nav implementation
+1003  2026-06-09  1:45   locked   Initech    Maintenance Retainer  QA           A very long note that should be truncated in the table outp…

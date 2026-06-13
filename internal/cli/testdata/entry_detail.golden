@@ -1,0 +1,9 @@
+ID        1002
+DATE      2026-06-10
+HOURS     2:15
+STATUS    running
+BILLABLE  true
+CLIENT    Globex
+PROJECT   Mobile App (102)
+TASK      Development (202)
+NOTES     Homepage hero and nav implementation
