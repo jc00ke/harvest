@@ -11,7 +11,7 @@ import (
 )
 
 // renderJSON marshals v to JSON and writes it to w with a trailing newline.
-func renderJSON(w io.Writer, v interface{}) error {
+func renderJSON(w io.Writer, v any) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(v)

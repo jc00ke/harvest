@@ -233,12 +233,12 @@ func (c *Client) Get(path string) (*http.Response, error) {
 }
 
 // Post performs a POST request to the specified path with the given body.
-func (c *Client) Post(path string, body interface{}) (*http.Response, error) {
+func (c *Client) Post(path string, body any) (*http.Response, error) {
 	return c.doRequest(http.MethodPost, path, body)
 }
 
 // Patch performs a PATCH request to the specified path with the given body.
-func (c *Client) Patch(path string, body interface{}) (*http.Response, error) {
+func (c *Client) Patch(path string, body any) (*http.Response, error) {
 	return c.doRequest(http.MethodPatch, path, body)
 }
 
@@ -248,7 +248,7 @@ func (c *Client) Delete(path string) (*http.Response, error) {
 }
 
 // doRequest performs an HTTP request with the appropriate headers.
-func (c *Client) doRequest(method, path string, body interface{}) (*http.Response, error) {
+func (c *Client) doRequest(method, path string, body any) (*http.Response, error) {
 	url := c.baseURL + path
 
 	var bodyReader io.Reader

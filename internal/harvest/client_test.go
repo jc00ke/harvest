@@ -33,7 +33,7 @@ func TestValidateAuth(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"id":         1,
 				"first_name": "Test",
 				"last_name":  "User",
@@ -67,7 +67,7 @@ func TestValidateAuth(t *testing.T) {
 	t.Run("given invalid credentials when ValidateAuth called then returns authentication error", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"error":             "invalid_token",
 				"error_description": "The access token is invalid",
 			})
@@ -180,12 +180,12 @@ func TestFetchProjects(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"projects": []map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
+				"projects": []map[string]any{
 					{
 						"id":   1,
 						"name": "API Development",
-						"client": map[string]interface{}{
+						"client": map[string]any{
 							"id":   100,
 							"name": "Acme Corp",
 						},
@@ -193,7 +193,7 @@ func TestFetchProjects(t *testing.T) {
 					{
 						"id":   2,
 						"name": "Mobile App",
-						"client": map[string]interface{}{
+						"client": map[string]any{
 							"id":   100,
 							"name": "Acme Corp",
 						},
@@ -201,7 +201,7 @@ func TestFetchProjects(t *testing.T) {
 					{
 						"id":   3,
 						"name": "Consulting",
-						"client": map[string]interface{}{
+						"client": map[string]any{
 							"id":   200,
 							"name": "BigCo Industries",
 						},
@@ -254,8 +254,8 @@ func TestFetchProjects(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"projects":      []interface{}{},
+			json.NewEncoder(w).Encode(map[string]any{
+				"projects":      []any{},
 				"per_page":      100,
 				"total_pages":   1,
 				"total_entries": 0,
@@ -287,10 +287,10 @@ func TestFetchProjects(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 
 			if page == "" || page == "1" {
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"projects": []map[string]interface{}{
-						{"id": 1, "name": "Project 1", "client": map[string]interface{}{"id": 1, "name": "Client 1"}},
-						{"id": 2, "name": "Project 2", "client": map[string]interface{}{"id": 1, "name": "Client 1"}},
+				json.NewEncoder(w).Encode(map[string]any{
+					"projects": []map[string]any{
+						{"id": 1, "name": "Project 1", "client": map[string]any{"id": 1, "name": "Client 1"}},
+						{"id": 2, "name": "Project 2", "client": map[string]any{"id": 1, "name": "Client 1"}},
 					},
 					"per_page":      2,
 					"total_pages":   2,
@@ -299,9 +299,9 @@ func TestFetchProjects(t *testing.T) {
 					"next_page":     2,
 				})
 			} else {
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"projects": []map[string]interface{}{
-						{"id": 3, "name": "Project 3", "client": map[string]interface{}{"id": 2, "name": "Client 2"}},
+				json.NewEncoder(w).Encode(map[string]any{
+					"projects": []map[string]any{
+						{"id": 3, "name": "Project 3", "client": map[string]any{"id": 2, "name": "Client 2"}},
 					},
 					"per_page":      2,
 					"total_pages":   2,
@@ -346,15 +346,15 @@ func TestFetchTaskAssignments(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"task_assignments": []map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
+				"task_assignments": []map[string]any{
 					{
 						"id": 1,
-						"project": map[string]interface{}{
+						"project": map[string]any{
 							"id":   100,
 							"name": "API Development",
 						},
-						"task": map[string]interface{}{
+						"task": map[string]any{
 							"id":   1000,
 							"name": "Code Review",
 						},
@@ -363,11 +363,11 @@ func TestFetchTaskAssignments(t *testing.T) {
 					},
 					{
 						"id": 2,
-						"project": map[string]interface{}{
+						"project": map[string]any{
 							"id":   100,
 							"name": "API Development",
 						},
-						"task": map[string]interface{}{
+						"task": map[string]any{
 							"id":   1001,
 							"name": "Development",
 						},
@@ -376,11 +376,11 @@ func TestFetchTaskAssignments(t *testing.T) {
 					},
 					{
 						"id": 3,
-						"project": map[string]interface{}{
+						"project": map[string]any{
 							"id":   200,
 							"name": "Mobile App",
 						},
-						"task": map[string]interface{}{
+						"task": map[string]any{
 							"id":   1002,
 							"name": "Testing",
 						},
@@ -430,8 +430,8 @@ func TestFetchTaskAssignments(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"task_assignments": []interface{}{},
+			json.NewEncoder(w).Encode(map[string]any{
+				"task_assignments": []any{},
 				"per_page":         100,
 				"total_pages":      1,
 				"total_entries":    0,
@@ -463,10 +463,10 @@ func TestFetchTaskAssignments(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 
 			if page == "" || page == "1" {
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"task_assignments": []map[string]interface{}{
-						{"id": 1, "project": map[string]interface{}{"id": 1, "name": "P1"}, "task": map[string]interface{}{"id": 1, "name": "T1"}},
-						{"id": 2, "project": map[string]interface{}{"id": 1, "name": "P1"}, "task": map[string]interface{}{"id": 2, "name": "T2"}},
+				json.NewEncoder(w).Encode(map[string]any{
+					"task_assignments": []map[string]any{
+						{"id": 1, "project": map[string]any{"id": 1, "name": "P1"}, "task": map[string]any{"id": 1, "name": "T1"}},
+						{"id": 2, "project": map[string]any{"id": 1, "name": "P1"}, "task": map[string]any{"id": 2, "name": "T2"}},
 					},
 					"per_page":      2,
 					"total_pages":   2,
@@ -475,9 +475,9 @@ func TestFetchTaskAssignments(t *testing.T) {
 					"next_page":     2,
 				})
 			} else {
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"task_assignments": []map[string]interface{}{
-						{"id": 3, "project": map[string]interface{}{"id": 2, "name": "P2"}, "task": map[string]interface{}{"id": 3, "name": "T3"}},
+				json.NewEncoder(w).Encode(map[string]any{
+					"task_assignments": []map[string]any{
+						{"id": 3, "project": map[string]any{"id": 2, "name": "P2"}, "task": map[string]any{"id": 3, "name": "T3"}},
 					},
 					"per_page":      2,
 					"total_pages":   2,
@@ -529,8 +529,8 @@ func TestFetchTimeEntries(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"time_entries": []map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
+				"time_entries": []map[string]any{
 					{
 						"id":         1,
 						"spent_date": "2025-01-15",
@@ -539,15 +539,15 @@ func TestFetchTimeEntries(t *testing.T) {
 						"is_running": false,
 						"is_locked":  false,
 						"billable":   true,
-						"client": map[string]interface{}{
+						"client": map[string]any{
 							"id":   100,
 							"name": "Acme Corp",
 						},
-						"project": map[string]interface{}{
+						"project": map[string]any{
 							"id":   200,
 							"name": "API Development",
 						},
-						"task": map[string]interface{}{
+						"task": map[string]any{
 							"id":   300,
 							"name": "Code Review",
 						},
@@ -560,15 +560,15 @@ func TestFetchTimeEntries(t *testing.T) {
 						"is_running": true,
 						"is_locked":  false,
 						"billable":   true,
-						"client": map[string]interface{}{
+						"client": map[string]any{
 							"id":   100,
 							"name": "Acme Corp",
 						},
-						"project": map[string]interface{}{
+						"project": map[string]any{
 							"id":   201,
 							"name": "Mobile App",
 						},
-						"task": map[string]interface{}{
+						"task": map[string]any{
 							"id":   301,
 							"name": "Development",
 						},
@@ -581,15 +581,15 @@ func TestFetchTimeEntries(t *testing.T) {
 						"is_running": false,
 						"is_locked":  true,
 						"billable":   false,
-						"client": map[string]interface{}{
+						"client": map[string]any{
 							"id":   101,
 							"name": "BigCo Industries",
 						},
-						"project": map[string]interface{}{
+						"project": map[string]any{
 							"id":   202,
 							"name": "Consulting",
 						},
-						"task": map[string]interface{}{
+						"task": map[string]any{
 							"id":   302,
 							"name": "Meetings",
 						},
@@ -654,8 +654,8 @@ func TestFetchTimeEntries(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"time_entries":  []interface{}{},
+			json.NewEncoder(w).Encode(map[string]any{
+				"time_entries":  []any{},
 				"per_page":      100,
 				"total_pages":   1,
 				"total_entries": 0,
@@ -688,10 +688,10 @@ func TestFetchTimeEntries(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 
 			if page == "" || page == "1" {
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"time_entries": []map[string]interface{}{
-						{"id": 1, "spent_date": "2025-01-15", "hours": 1.0, "client": map[string]interface{}{"id": 1, "name": "C1"}, "project": map[string]interface{}{"id": 1, "name": "P1"}, "task": map[string]interface{}{"id": 1, "name": "T1"}},
-						{"id": 2, "spent_date": "2025-01-15", "hours": 1.0, "client": map[string]interface{}{"id": 1, "name": "C1"}, "project": map[string]interface{}{"id": 1, "name": "P1"}, "task": map[string]interface{}{"id": 1, "name": "T1"}},
+				json.NewEncoder(w).Encode(map[string]any{
+					"time_entries": []map[string]any{
+						{"id": 1, "spent_date": "2025-01-15", "hours": 1.0, "client": map[string]any{"id": 1, "name": "C1"}, "project": map[string]any{"id": 1, "name": "P1"}, "task": map[string]any{"id": 1, "name": "T1"}},
+						{"id": 2, "spent_date": "2025-01-15", "hours": 1.0, "client": map[string]any{"id": 1, "name": "C1"}, "project": map[string]any{"id": 1, "name": "P1"}, "task": map[string]any{"id": 1, "name": "T1"}},
 					},
 					"per_page":      2,
 					"total_pages":   2,
@@ -700,9 +700,9 @@ func TestFetchTimeEntries(t *testing.T) {
 					"next_page":     2,
 				})
 			} else {
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"time_entries": []map[string]interface{}{
-						{"id": 3, "spent_date": "2025-01-15", "hours": 1.0, "client": map[string]interface{}{"id": 1, "name": "C1"}, "project": map[string]interface{}{"id": 1, "name": "P1"}, "task": map[string]interface{}{"id": 1, "name": "T1"}},
+				json.NewEncoder(w).Encode(map[string]any{
+					"time_entries": []map[string]any{
+						{"id": 3, "spent_date": "2025-01-15", "hours": 1.0, "client": map[string]any{"id": 1, "name": "C1"}, "project": map[string]any{"id": 1, "name": "P1"}, "task": map[string]any{"id": 1, "name": "T1"}},
 					},
 					"per_page":      2,
 					"total_pages":   2,
@@ -748,12 +748,12 @@ func TestCreateTimeEntry(t *testing.T) {
 			}
 
 			// Verify request body
-			var reqData map[string]interface{}
+			var reqData map[string]any
 			if err := json.NewDecoder(r.Body).Decode(&reqData); err != nil {
 				t.Fatalf("failed to decode request body: %v", err)
 			}
 
-			wantFields := map[string]interface{}{
+			wantFields := map[string]any{
 				"project_id": float64(100),
 				"task_id":    float64(200),
 				"spent_date": "2025-01-15",
@@ -769,7 +769,7 @@ func TestCreateTimeEntry(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"id":         1001,
 				"spent_date": "2025-01-15",
 				"hours":      1.5,
@@ -777,15 +777,15 @@ func TestCreateTimeEntry(t *testing.T) {
 				"is_running": false,
 				"is_locked":  false,
 				"billable":   true,
-				"client": map[string]interface{}{
+				"client": map[string]any{
 					"id":   50,
 					"name": "Test Client",
 				},
-				"project": map[string]interface{}{
+				"project": map[string]any{
 					"id":   100,
 					"name": "Test Project",
 				},
-				"task": map[string]interface{}{
+				"task": map[string]any{
 					"id":   200,
 					"name": "Development",
 				},
@@ -831,7 +831,7 @@ func TestCreateTimeEntry(t *testing.T) {
 
 	t.Run("given time entry with billable field when CreateTimeEntry called then creates entry with correct billable flag", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var reqData map[string]interface{}
+			var reqData map[string]any
 			if err := json.NewDecoder(r.Body).Decode(&reqData); err != nil {
 				t.Fatalf("failed to decode request body: %v", err)
 			}
@@ -842,15 +842,15 @@ func TestCreateTimeEntry(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"id":         1002,
 				"spent_date": "2025-01-15",
 				"hours":      2.0,
 				"notes":      "Non-billable work",
 				"billable":   false,
-				"client":     map[string]interface{}{"id": 50, "name": "Test Client"},
-				"project":    map[string]interface{}{"id": 100, "name": "Test Project"},
-				"task":       map[string]interface{}{"id": 200, "name": "Development"},
+				"client":     map[string]any{"id": 50, "name": "Test Client"},
+				"project":    map[string]any{"id": 100, "name": "Test Project"},
+				"task":       map[string]any{"id": 200, "name": "Development"},
 			})
 		}))
 		defer server.Close()
@@ -881,7 +881,7 @@ func TestCreateTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "The project_id field is required.",
 			})
 		}))
@@ -912,7 +912,7 @@ func TestCreateTimeEntry(t *testing.T) {
 	t.Run("given unauthorized request when CreateTimeEntry called then returns auth error", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"error": "invalid_token",
 			})
 		}))
@@ -959,12 +959,12 @@ func TestUpdateTimeEntry(t *testing.T) {
 			}
 
 			// Verify request body
-			var reqData map[string]interface{}
+			var reqData map[string]any
 			if err := json.NewDecoder(r.Body).Decode(&reqData); err != nil {
 				t.Fatalf("failed to decode request body: %v", err)
 			}
 
-			wantFields := map[string]interface{}{
+			wantFields := map[string]any{
 				"hours": 2.5,
 				"notes": "Updated notes",
 			}
@@ -977,7 +977,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"id":         1001,
 				"spent_date": "2025-01-15",
 				"hours":      2.5,
@@ -985,15 +985,15 @@ func TestUpdateTimeEntry(t *testing.T) {
 				"is_running": false,
 				"is_locked":  false,
 				"billable":   true,
-				"client": map[string]interface{}{
+				"client": map[string]any{
 					"id":   50,
 					"name": "Test Client",
 				},
-				"project": map[string]interface{}{
+				"project": map[string]any{
 					"id":   100,
 					"name": "Test Project",
 				},
-				"task": map[string]interface{}{
+				"task": map[string]any{
 					"id":   200,
 					"name": "Development",
 				},
@@ -1028,7 +1028,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 	t.Run("given billable field when UpdateTimeEntry called then updates billable flag", func(t *testing.T) {
 		entryID := 1001
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var reqData map[string]interface{}
+			var reqData map[string]any
 			if err := json.NewDecoder(r.Body).Decode(&reqData); err != nil {
 				t.Fatalf("failed to decode request body: %v", err)
 			}
@@ -1039,12 +1039,12 @@ func TestUpdateTimeEntry(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"id":       1001,
 				"billable": true,
-				"client":   map[string]interface{}{"id": 50, "name": "Test Client"},
-				"project":  map[string]interface{}{"id": 100, "name": "Test Project"},
-				"task":     map[string]interface{}{"id": 200, "name": "Development"},
+				"client":   map[string]any{"id": 50, "name": "Test Client"},
+				"project":  map[string]any{"id": 100, "name": "Test Project"},
+				"task":     map[string]any{"id": 200, "name": "Development"},
 			})
 		}))
 		defer server.Close()
@@ -1071,7 +1071,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry is locked and cannot be modified.",
 			})
 		}))
@@ -1102,7 +1102,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry not found.",
 			})
 		}))
@@ -1132,7 +1132,7 @@ func TestUpdateTimeEntry(t *testing.T) {
 		entryID := 1001
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"error": "invalid_token",
 			})
 		}))
@@ -1197,7 +1197,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry is locked and cannot be deleted.",
 			})
 		}))
@@ -1221,7 +1221,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Cannot delete a running time entry.",
 			})
 		}))
@@ -1245,7 +1245,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry not found.",
 			})
 		}))
@@ -1268,7 +1268,7 @@ func TestDeleteTimeEntry(t *testing.T) {
 		entryID := 1001
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"error": "invalid_token",
 			})
 		}))
@@ -1309,7 +1309,7 @@ func TestRestartTimeEntry(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"id":         1001,
 				"spent_date": "2025-01-15",
 				"hours":      2.5,
@@ -1317,15 +1317,15 @@ func TestRestartTimeEntry(t *testing.T) {
 				"is_running": true,
 				"is_locked":  false,
 				"billable":   true,
-				"client": map[string]interface{}{
+				"client": map[string]any{
 					"id":   50,
 					"name": "Test Client",
 				},
-				"project": map[string]interface{}{
+				"project": map[string]any{
 					"id":   100,
 					"name": "Test Project",
 				},
-				"task": map[string]interface{}{
+				"task": map[string]any{
 					"id":   200,
 					"name": "Development",
 				},
@@ -1354,7 +1354,7 @@ func TestRestartTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry is locked and cannot be restarted.",
 			})
 		}))
@@ -1381,7 +1381,7 @@ func TestRestartTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry not found.",
 			})
 		}))
@@ -1425,7 +1425,7 @@ func TestStopTimeEntry(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"id":         1001,
 				"spent_date": "2025-01-15",
 				"hours":      3.25,
@@ -1433,15 +1433,15 @@ func TestStopTimeEntry(t *testing.T) {
 				"is_running": false,
 				"is_locked":  false,
 				"billable":   true,
-				"client": map[string]interface{}{
+				"client": map[string]any{
 					"id":   50,
 					"name": "Test Client",
 				},
-				"project": map[string]interface{}{
+				"project": map[string]any{
 					"id":   100,
 					"name": "Test Project",
 				},
-				"task": map[string]interface{}{
+				"task": map[string]any{
 					"id":   200,
 					"name": "Development",
 				},
@@ -1473,7 +1473,7 @@ func TestStopTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry is not running.",
 			})
 		}))
@@ -1500,7 +1500,7 @@ func TestStopTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry is locked and cannot be stopped.",
 			})
 		}))
@@ -1527,7 +1527,7 @@ func TestStopTimeEntry(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Time entry not found.",
 			})
 		}))
@@ -1673,7 +1673,7 @@ func TestAPIErrorsIncludeResponseBody(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnprocessableEntity)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "Notes can't be blank",
 			})
 		}))
@@ -1695,7 +1695,7 @@ func TestAPIErrorsIncludeResponseBody(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"error":             "invalid_token",
 				"error_description": "The access token is invalid",
 			})
@@ -1755,7 +1755,7 @@ func TestAPIErrorsIncludeResponseBody(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusForbidden)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			json.NewEncoder(w).Encode(map[string]any{
 				"message": "The object you requested was not found",
 			})
 		}))

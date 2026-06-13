@@ -125,7 +125,7 @@ func fillNames(e *harvest.TimeEntry, projectID, taskID int) bool {
 	return true
 }
 
-func writeJSON(w http.ResponseWriter, status int, v interface{}) {
+func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(v)
@@ -136,14 +136,14 @@ func (s *server) handleMe(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) handleProjects(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]interface{}{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"projects":  demoProjects,
 		"next_page": nil,
 	})
 }
 
 func (s *server) handleTaskAssignments(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]interface{}{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"task_assignments": demoTaskAssignments,
 		"next_page":        nil,
 	})
@@ -161,7 +161,7 @@ func (s *server) handleListEntries(w http.ResponseWriter, r *http.Request) {
 			matched = append(matched, e)
 		}
 	}
-	writeJSON(w, http.StatusOK, map[string]interface{}{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"time_entries": matched,
 		"next_page":    nil,
 	})
