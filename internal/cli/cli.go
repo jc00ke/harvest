@@ -46,7 +46,11 @@ func Execute() int {
 	return 0
 }
 
-// authedClient loads config (env vars first, then file), constructs a Harvest
+// newAPIClient constructs a Harvest API client. It is a variable so tests
+// can point commands at a stub server.
+var newAPIClient = harvest.NewClient
+
+// authedClient loads credentials from the OS keyring, constructs a Harvest
 // client, and validates the credentials. It is invoked from each command's
 // RunE so that --help works without requiring credentials.
 func authedClient() (*harvest.Client, *harvest.User, error) {
@@ -54,7 +58,7 @@ func authedClient() (*harvest.Client, *harvest.User, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	client := harvest.NewClient(cfg.Harvest.AccountID, cfg.Harvest.AccessToken)
+	client := newAPIClient(cfg.Harvest.AccountID, cfg.Harvest.AccessToken)
 	user, err := client.ValidateAuth()
 	if err != nil {
 		return nil, nil, fmt.Errorf("authentication failed: %w", err)

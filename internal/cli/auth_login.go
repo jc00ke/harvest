@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/jc00ke/harvest/internal/config"
-	"github.com/jc00ke/harvest/internal/harvest"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -31,7 +30,7 @@ Credentials may also be supplied non-interactively via --account-id and
 				return err
 			}
 
-			client := harvest.NewClient(accountID, accessToken)
+			client := newAPIClient(accountID, accessToken)
 			user, err := client.ValidateAuth()
 			if err != nil {
 				return fmt.Errorf("authentication failed: %w", err)
