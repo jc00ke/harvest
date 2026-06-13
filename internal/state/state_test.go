@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -38,20 +39,16 @@ func TestStateLoading(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(state.Recents) != 2 {
-			t.Errorf("expected 2 recents, got %d", len(state.Recents))
+		if got, want := len(state.Recents), 2; got != want {
+			t.Errorf("len(state.Recents)=%d, want=%d", got, want)
 		}
 
-		first := state.Recents[0]
-		if first.ClientID != 123 || first.ProjectID != 456 || first.TaskID != 789 {
-			t.Errorf("expected first recent {123, 456, 789}, got {%d, %d, %d}",
-				first.ClientID, first.ProjectID, first.TaskID)
+		if got, want := state.Recents[0], (RecentEntry{ClientID: 123, ProjectID: 456, TaskID: 789}); got != want {
+			t.Errorf("first recent=%+v, want=%+v", got, want)
 		}
 
-		second := state.Recents[1]
-		if second.ClientID != 124 || second.ProjectID != 457 || second.TaskID != 790 {
-			t.Errorf("expected second recent {124, 457, 790}, got {%d, %d, %d}",
-				second.ClientID, second.ProjectID, second.TaskID)
+		if got, want := state.Recents[1], (RecentEntry{ClientID: 124, ProjectID: 457, TaskID: 790}); got != want {
+			t.Errorf("second recent=%+v, want=%+v", got, want)
 		}
 	})
 
@@ -71,8 +68,8 @@ func TestStateLoading(t *testing.T) {
 			t.Fatal("expected state to be initialized, got nil")
 		}
 
-		if len(state.Recents) != 0 {
-			t.Errorf("expected empty recents list, got %d items", len(state.Recents))
+		if got, want := len(state.Recents), 0; got != want {
+			t.Errorf("len(state.Recents)=%d, want=%d", got, want)
 		}
 	})
 
@@ -101,8 +98,8 @@ func TestStateLoading(t *testing.T) {
 			t.Fatal("expected error for malformed state file")
 		}
 
-		if err.Error()[:27] != "could not parse state file:" {
-			t.Errorf("expected parse error, got '%s'", err.Error())
+		if got, want := err.Error(), "could not parse state file:"; !strings.HasPrefix(got, want) {
+			t.Errorf("error=%q, want prefix %q", got, want)
 		}
 	})
 
@@ -131,8 +128,8 @@ func TestStateLoading(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(state.Recents) != 0 {
-			t.Errorf("expected empty recents list, got %d items", len(state.Recents))
+		if got, want := len(state.Recents), 0; got != want {
+			t.Errorf("len(state.Recents)=%d, want=%d", got, want)
 		}
 	})
 }
@@ -169,14 +166,12 @@ func TestStateSaving(t *testing.T) {
 			t.Fatalf("expected valid JSON, got error: %v", err)
 		}
 
-		if len(savedState.Recents) != 2 {
-			t.Errorf("expected 2 recents in saved state, got %d", len(savedState.Recents))
+		if got, want := len(savedState.Recents), 2; got != want {
+			t.Errorf("len(savedState.Recents)=%d, want=%d", got, want)
 		}
 
-		first := savedState.Recents[0]
-		if first.ClientID != 123 || first.ProjectID != 456 || first.TaskID != 789 {
-			t.Errorf("expected first recent {123, 456, 789}, got {%d, %d, %d}",
-				first.ClientID, first.ProjectID, first.TaskID)
+		if got, want := savedState.Recents[0], (RecentEntry{ClientID: 123, ProjectID: 456, TaskID: 789}); got != want {
+			t.Errorf("first recent=%+v, want=%+v", got, want)
 		}
 	})
 
@@ -206,8 +201,8 @@ func TestStateSaving(t *testing.T) {
 			t.Fatalf("expected valid JSON, got error: %v", err)
 		}
 
-		if len(savedState.Recents) != 0 {
-			t.Errorf("expected empty recents in saved state, got %d", len(savedState.Recents))
+		if got, want := len(savedState.Recents), 0; got != want {
+			t.Errorf("len(savedState.Recents)=%d, want=%d", got, want)
 		}
 	})
 
@@ -243,14 +238,12 @@ func TestRecentsManagement(t *testing.T) {
 
 		state.AddRecent(123, 456, 789)
 
-		if len(state.Recents) != 1 {
-			t.Errorf("expected 1 recent, got %d", len(state.Recents))
+		if got, want := len(state.Recents), 1; got != want {
+			t.Errorf("len(state.Recents)=%d, want=%d", got, want)
 		}
 
-		first := state.Recents[0]
-		if first.ClientID != 123 || first.ProjectID != 456 || first.TaskID != 789 {
-			t.Errorf("expected recent {123, 456, 789}, got {%d, %d, %d}",
-				first.ClientID, first.ProjectID, first.TaskID)
+		if got, want := state.Recents[0], (RecentEntry{ClientID: 123, ProjectID: 456, TaskID: 789}); got != want {
+			t.Errorf("recent=%+v, want=%+v", got, want)
 		}
 	})
 
@@ -265,19 +258,16 @@ func TestRecentsManagement(t *testing.T) {
 
 		state.AddRecent(124, 457, 790)
 
-		if len(state.Recents) != 3 {
-			t.Errorf("expected 3 recents after adding duplicate, got %d", len(state.Recents))
+		if got, want := len(state.Recents), 3; got != want {
+			t.Errorf("len(state.Recents)=%d, want=%d", got, want)
 		}
 
-		first := state.Recents[0]
-		if first.ClientID != 124 || first.ProjectID != 457 || first.TaskID != 790 {
-			t.Errorf("expected duplicate moved to top {124, 457, 790}, got {%d, %d, %d}",
-				first.ClientID, first.ProjectID, first.TaskID)
+		if got, want := state.Recents[0], (RecentEntry{ClientID: 124, ProjectID: 457, TaskID: 790}); got != want {
+			t.Errorf("first recent=%+v, want=%+v", got, want)
 		}
 
 		for i := 1; i < len(state.Recents); i++ {
-			recent := state.Recents[i]
-			if recent.ClientID == 124 && recent.ProjectID == 457 && recent.TaskID == 790 {
+			if state.Recents[i] == (RecentEntry{ClientID: 124, ProjectID: 457, TaskID: 790}) {
 				t.Error("found duplicate entry that should have been removed")
 			}
 		}
@@ -294,18 +284,16 @@ func TestRecentsManagement(t *testing.T) {
 
 		state.AddRecent(126, 459, 792)
 
-		if len(state.Recents) != 3 {
-			t.Errorf("expected 3 recents after adding 4th, got %d", len(state.Recents))
+		if got, want := len(state.Recents), 3; got != want {
+			t.Errorf("len(state.Recents)=%d, want=%d", got, want)
 		}
 
-		first := state.Recents[0]
-		if first.ClientID != 126 || first.ProjectID != 459 || first.TaskID != 792 {
-			t.Errorf("expected new recent at top {126, 459, 792}, got {%d, %d, %d}",
-				first.ClientID, first.ProjectID, first.TaskID)
+		if got, want := state.Recents[0], (RecentEntry{ClientID: 126, ProjectID: 459, TaskID: 792}); got != want {
+			t.Errorf("first recent=%+v, want=%+v", got, want)
 		}
 
 		for _, recent := range state.Recents {
-			if recent.ClientID == 125 && recent.ProjectID == 458 && recent.TaskID == 791 {
+			if recent == (RecentEntry{ClientID: 125, ProjectID: 458, TaskID: 791}) {
 				t.Error("oldest entry should have been removed when adding 4th recent")
 			}
 		}
@@ -321,20 +309,16 @@ func TestRecentsManagement(t *testing.T) {
 
 		state.AddRecent(125, 458, 791)
 
-		if len(state.Recents) != 3 {
-			t.Errorf("expected 3 recents, got %d", len(state.Recents))
+		if got, want := len(state.Recents), 3; got != want {
+			t.Errorf("len(state.Recents)=%d, want=%d", got, want)
 		}
 
-		first := state.Recents[0]
-		if first.ClientID != 125 || first.ProjectID != 458 || first.TaskID != 791 {
-			t.Errorf("expected new recent at top {125, 458, 791}, got {%d, %d, %d}",
-				first.ClientID, first.ProjectID, first.TaskID)
+		if got, want := state.Recents[0], (RecentEntry{ClientID: 125, ProjectID: 458, TaskID: 791}); got != want {
+			t.Errorf("first recent=%+v, want=%+v", got, want)
 		}
 
-		second := state.Recents[1]
-		if second.ClientID != 123 || second.ProjectID != 456 || second.TaskID != 789 {
-			t.Errorf("expected previous first moved to second {123, 456, 789}, got {%d, %d, %d}",
-				second.ClientID, second.ProjectID, second.TaskID)
+		if got, want := state.Recents[1], (RecentEntry{ClientID: 123, ProjectID: 456, TaskID: 789}); got != want {
+			t.Errorf("second recent=%+v, want=%+v", got, want)
 		}
 	})
 }

@@ -61,8 +61,8 @@ func TestSummarizeEntries(t *testing.T) {
 			entry("Acme", "2026-06-08", "", 1),
 			entry("Acme", "2026-06-08", "standup", 0.5),
 		})
-		if got[0].Notes != "standup" {
-			t.Errorf("got notes %q, want %q", got[0].Notes, "standup")
+		if got, want := got[0].Notes, "standup"; got != want {
+			t.Errorf("notes=%q, want=%q", got, want)
 		}
 	})
 

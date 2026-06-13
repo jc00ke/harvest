@@ -13,19 +13,19 @@ import (
 func TestValidateAuth(t *testing.T) {
 	t.Run("given valid credentials when ValidateAuth called then returns user info without error", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/v2/users/me" {
-				t.Errorf("expected path /v2/users/me, got %s", r.URL.Path)
+			if got, want := r.URL.Path, "/v2/users/me"; got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodGet {
-				t.Errorf("expected method GET, got %s", r.Method)
+			if got, want := r.Method, http.MethodGet; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 
 			// Verify headers
-			if r.Header.Get("Harvest-Account-Id") != "12345" {
-				t.Errorf("expected Harvest-Account-Id header 12345, got %s", r.Header.Get("Harvest-Account-Id"))
+			if got, want := r.Header.Get("Harvest-Account-Id"), "12345"; got != want {
+				t.Errorf("Harvest-Account-Id header=%s, want=%s", got, want)
 			}
-			if r.Header.Get("Authorization") != "Bearer test-token" {
-				t.Errorf("expected Authorization header Bearer test-token, got %s", r.Header.Get("Authorization"))
+			if got, want := r.Header.Get("Authorization"), "Bearer test-token"; got != want {
+				t.Errorf("Authorization header=%s, want=%s", got, want)
 			}
 			if r.Header.Get("User-Agent") == "" {
 				t.Error("expected User-Agent header to be set")
@@ -50,17 +50,17 @@ func TestValidateAuth(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if user.ID != 1 {
-			t.Errorf("expected user ID 1, got %d", user.ID)
+		if got, want := user.ID, 1; got != want {
+			t.Errorf("user.ID=%d, want=%d", got, want)
 		}
-		if user.FirstName != "Test" {
-			t.Errorf("expected first name Test, got %s", user.FirstName)
+		if got, want := user.FirstName, "Test"; got != want {
+			t.Errorf("user.FirstName=%s, want=%s", got, want)
 		}
-		if user.LastName != "User" {
-			t.Errorf("expected last name User, got %s", user.LastName)
+		if got, want := user.LastName, "User"; got != want {
+			t.Errorf("user.LastName=%s, want=%s", got, want)
 		}
-		if user.Email != "test@example.com" {
-			t.Errorf("expected email test@example.com, got %s", user.Email)
+		if got, want := user.Email, "test@example.com"; got != want {
+			t.Errorf("user.Email=%s, want=%s", got, want)
 		}
 	})
 
@@ -85,9 +85,8 @@ func TestValidateAuth(t *testing.T) {
 			t.Errorf("expected nil user, got %v", user)
 		}
 
-		// Check that error indicates authentication failure
-		if !strings.Contains(err.Error(), "authentication failed") && !strings.Contains(err.Error(), "Authentication failed") {
-			t.Errorf("expected authentication failure error, got: %s", err.Error())
+		if got, want := err.Error(), "authentication failed"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -109,9 +108,8 @@ func TestValidateAuth(t *testing.T) {
 			t.Errorf("expected nil user, got %v", user)
 		}
 
-		// Check that error indicates rate limiting
-		if !strings.Contains(err.Error(), "429") && !strings.Contains(err.Error(), "rate") {
-			t.Errorf("expected rate limit error, got: %s", err.Error())
+		if got, want := err.Error(), "429"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -134,9 +132,8 @@ func TestValidateAuth(t *testing.T) {
 			t.Errorf("expected nil user, got %v", user)
 		}
 
-		// Check that error indicates parsing failure
-		if !strings.Contains(err.Error(), "parse") && !strings.Contains(err.Error(), "Parse") {
-			t.Errorf("expected parse error, got: %s", err.Error())
+		if got, want := err.Error(), "parse"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -161,9 +158,8 @@ func TestValidateAuth(t *testing.T) {
 			t.Errorf("expected nil user, got %v", user)
 		}
 
-		// Check that error indicates network failure
-		if !strings.Contains(err.Error(), "network") && !strings.Contains(err.Error(), "timeout") && !strings.Contains(err.Error(), "Timeout") {
-			t.Errorf("expected network/timeout error, got: %s", err.Error())
+		if got, want := err.Error(), "network"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 }
@@ -171,15 +167,15 @@ func TestValidateAuth(t *testing.T) {
 func TestFetchProjects(t *testing.T) {
 	t.Run("given valid response when FetchProjects called then returns projects with client data", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/v2/projects" {
-				t.Errorf("expected path /v2/projects, got %s", r.URL.Path)
+			if got, want := r.URL.Path, "/v2/projects"; got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodGet {
-				t.Errorf("expected method GET, got %s", r.Method)
+			if got, want := r.Method, http.MethodGet; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 			// Verify is_active query param is set
-			if r.URL.Query().Get("is_active") != "true" {
-				t.Errorf("expected is_active=true query param, got %s", r.URL.Query().Get("is_active"))
+			if got, want := r.URL.Query().Get("is_active"), "true"; got != want {
+				t.Errorf("is_active query param=%s, want=%s", got, want)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -227,30 +223,30 @@ func TestFetchProjects(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(projects) != 3 {
-			t.Fatalf("expected 3 projects, got %d", len(projects))
+		if got, want := len(projects), 3; got != want {
+			t.Fatalf("len(projects)=%d, want=%d", got, want)
 		}
 
 		// Verify first project
-		if projects[0].ID != 1 {
-			t.Errorf("expected project ID 1, got %d", projects[0].ID)
+		if got, want := projects[0].ID, 1; got != want {
+			t.Errorf("project ID=%d, want=%d", got, want)
 		}
-		if projects[0].Name != "API Development" {
-			t.Errorf("expected project name 'API Development', got '%s'", projects[0].Name)
+		if got, want := projects[0].Name, "API Development"; got != want {
+			t.Errorf("project name=%s, want=%s", got, want)
 		}
-		if projects[0].Client.ID != 100 {
-			t.Errorf("expected client ID 100, got %d", projects[0].Client.ID)
+		if got, want := projects[0].Client.ID, 100; got != want {
+			t.Errorf("client ID=%d, want=%d", got, want)
 		}
-		if projects[0].Client.Name != "Acme Corp" {
-			t.Errorf("expected client name 'Acme Corp', got '%s'", projects[0].Client.Name)
+		if got, want := projects[0].Client.Name, "Acme Corp"; got != want {
+			t.Errorf("client name=%s, want=%s", got, want)
 		}
 
 		// Verify third project has different client
-		if projects[2].Client.ID != 200 {
-			t.Errorf("expected client ID 200, got %d", projects[2].Client.ID)
+		if got, want := projects[2].Client.ID, 200; got != want {
+			t.Errorf("client ID=%d, want=%d", got, want)
 		}
-		if projects[2].Client.Name != "BigCo Industries" {
-			t.Errorf("expected client name 'BigCo Industries', got '%s'", projects[2].Client.Name)
+		if got, want := projects[2].Client.Name, "BigCo Industries"; got != want {
+			t.Errorf("client name=%s, want=%s", got, want)
 		}
 	})
 
@@ -276,8 +272,8 @@ func TestFetchProjects(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(projects) != 0 {
-			t.Errorf("expected 0 projects, got %d", len(projects))
+		if got, want := len(projects), 0; got != want {
+			t.Errorf("len(projects)=%d, want=%d", got, want)
 		}
 	})
 
@@ -324,12 +320,12 @@ func TestFetchProjects(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(projects) != 3 {
-			t.Errorf("expected 3 projects from pagination, got %d", len(projects))
+		if got, want := len(projects), 3; got != want {
+			t.Errorf("len(projects)=%d, want=%d", got, want)
 		}
 
-		if requestCount != 2 {
-			t.Errorf("expected 2 requests for pagination, got %d", requestCount)
+		if got, want := requestCount, 2; got != want {
+			t.Errorf("request count=%d, want=%d", got, want)
 		}
 	})
 }
@@ -337,15 +333,15 @@ func TestFetchProjects(t *testing.T) {
 func TestFetchTaskAssignments(t *testing.T) {
 	t.Run("given valid response when FetchTaskAssignments called then returns task assignments with project and task data", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/v2/task_assignments" {
-				t.Errorf("expected path /v2/task_assignments, got %s", r.URL.Path)
+			if got, want := r.URL.Path, "/v2/task_assignments"; got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodGet {
-				t.Errorf("expected method GET, got %s", r.Method)
+			if got, want := r.Method, http.MethodGet; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 			// Verify is_active query param is set
-			if r.URL.Query().Get("is_active") != "true" {
-				t.Errorf("expected is_active=true query param, got %s", r.URL.Query().Get("is_active"))
+			if got, want := r.URL.Query().Get("is_active"), "true"; got != want {
+				t.Errorf("is_active query param=%s, want=%s", got, want)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -408,25 +404,25 @@ func TestFetchTaskAssignments(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(taskAssignments) != 3 {
-			t.Fatalf("expected 3 task assignments, got %d", len(taskAssignments))
+		if got, want := len(taskAssignments), 3; got != want {
+			t.Fatalf("len(taskAssignments)=%d, want=%d", got, want)
 		}
 
 		// Verify first task assignment
-		if taskAssignments[0].ID != 1 {
-			t.Errorf("expected task assignment ID 1, got %d", taskAssignments[0].ID)
+		if got, want := taskAssignments[0].ID, 1; got != want {
+			t.Errorf("task assignment ID=%d, want=%d", got, want)
 		}
-		if taskAssignments[0].Project.ID != 100 {
-			t.Errorf("expected project ID 100, got %d", taskAssignments[0].Project.ID)
+		if got, want := taskAssignments[0].Project.ID, 100; got != want {
+			t.Errorf("project ID=%d, want=%d", got, want)
 		}
-		if taskAssignments[0].Project.Name != "API Development" {
-			t.Errorf("expected project name 'API Development', got '%s'", taskAssignments[0].Project.Name)
+		if got, want := taskAssignments[0].Project.Name, "API Development"; got != want {
+			t.Errorf("project name=%s, want=%s", got, want)
 		}
-		if taskAssignments[0].Task.ID != 1000 {
-			t.Errorf("expected task ID 1000, got %d", taskAssignments[0].Task.ID)
+		if got, want := taskAssignments[0].Task.ID, 1000; got != want {
+			t.Errorf("task ID=%d, want=%d", got, want)
 		}
-		if taskAssignments[0].Task.Name != "Code Review" {
-			t.Errorf("expected task name 'Code Review', got '%s'", taskAssignments[0].Task.Name)
+		if got, want := taskAssignments[0].Task.Name, "Code Review"; got != want {
+			t.Errorf("task name=%s, want=%s", got, want)
 		}
 	})
 
@@ -452,8 +448,8 @@ func TestFetchTaskAssignments(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(taskAssignments) != 0 {
-			t.Errorf("expected 0 task assignments, got %d", len(taskAssignments))
+		if got, want := len(taskAssignments), 0; got != want {
+			t.Errorf("len(taskAssignments)=%d, want=%d", got, want)
 		}
 	})
 
@@ -500,12 +496,12 @@ func TestFetchTaskAssignments(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(taskAssignments) != 3 {
-			t.Errorf("expected 3 task assignments from pagination, got %d", len(taskAssignments))
+		if got, want := len(taskAssignments), 3; got != want {
+			t.Errorf("len(taskAssignments)=%d, want=%d", got, want)
 		}
 
-		if requestCount != 2 {
-			t.Errorf("expected 2 requests for pagination, got %d", requestCount)
+		if got, want := requestCount, 2; got != want {
+			t.Errorf("request count=%d, want=%d", got, want)
 		}
 	})
 }
@@ -513,22 +509,22 @@ func TestFetchTaskAssignments(t *testing.T) {
 func TestFetchTimeEntries(t *testing.T) {
 	t.Run("given valid response when FetchTimeEntries called then returns time entries for date", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/v2/time_entries" {
-				t.Errorf("expected path /v2/time_entries, got %s", r.URL.Path)
+			if got, want := r.URL.Path, "/v2/time_entries"; got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodGet {
-				t.Errorf("expected method GET, got %s", r.Method)
+			if got, want := r.Method, http.MethodGet; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 			// Verify from and to query params are set to the same date
-			if r.URL.Query().Get("from") != "2025-01-15" {
-				t.Errorf("expected from=2025-01-15, got %s", r.URL.Query().Get("from"))
+			if got, want := r.URL.Query().Get("from"), "2025-01-15"; got != want {
+				t.Errorf("from query param=%s, want=%s", got, want)
 			}
-			if r.URL.Query().Get("to") != "2025-01-15" {
-				t.Errorf("expected to=2025-01-15, got %s", r.URL.Query().Get("to"))
+			if got, want := r.URL.Query().Get("to"), "2025-01-15"; got != want {
+				t.Errorf("to query param=%s, want=%s", got, want)
 			}
 			// Verify user_id is included
-			if r.URL.Query().Get("user_id") != "123" {
-				t.Errorf("expected user_id=123, got %s", r.URL.Query().Get("user_id"))
+			if got, want := r.URL.Query().Get("user_id"), "123"; got != want {
+				t.Errorf("user_id query param=%s, want=%s", got, want)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -616,41 +612,41 @@ func TestFetchTimeEntries(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(entries) != 3 {
-			t.Fatalf("expected 3 time entries, got %d", len(entries))
+		if got, want := len(entries), 3; got != want {
+			t.Fatalf("len(entries)=%d, want=%d", got, want)
 		}
 
 		// Verify first entry
-		if entries[0].ID != 1 {
-			t.Errorf("expected entry ID 1, got %d", entries[0].ID)
+		if got, want := entries[0].ID, 1; got != want {
+			t.Errorf("entry ID=%d, want=%d", got, want)
 		}
-		if entries[0].Hours != 1.5 {
-			t.Errorf("expected hours 1.5, got %f", entries[0].Hours)
+		if got, want := entries[0].Hours, 1.5; got != want {
+			t.Errorf("hours=%f, want=%f", got, want)
 		}
-		if entries[0].Notes != "Code review" {
-			t.Errorf("expected notes 'Code review', got '%s'", entries[0].Notes)
+		if got, want := entries[0].Notes, "Code review"; got != want {
+			t.Errorf("notes=%s, want=%s", got, want)
 		}
-		if entries[0].IsRunning != false {
-			t.Errorf("expected IsRunning false, got true")
+		if got, want := entries[0].IsRunning, false; got != want {
+			t.Errorf("IsRunning=%t, want=%t", got, want)
 		}
-		if entries[0].Client.Name != "Acme Corp" {
-			t.Errorf("expected client name 'Acme Corp', got '%s'", entries[0].Client.Name)
+		if got, want := entries[0].Client.Name, "Acme Corp"; got != want {
+			t.Errorf("client name=%s, want=%s", got, want)
 		}
-		if entries[0].Project.Name != "API Development" {
-			t.Errorf("expected project name 'API Development', got '%s'", entries[0].Project.Name)
+		if got, want := entries[0].Project.Name, "API Development"; got != want {
+			t.Errorf("project name=%s, want=%s", got, want)
 		}
-		if entries[0].Task.Name != "Code Review" {
-			t.Errorf("expected task name 'Code Review', got '%s'", entries[0].Task.Name)
+		if got, want := entries[0].Task.Name, "Code Review"; got != want {
+			t.Errorf("task name=%s, want=%s", got, want)
 		}
 
 		// Verify second entry is running
-		if entries[1].IsRunning != true {
-			t.Errorf("expected entry 2 to be running")
+		if got, want := entries[1].IsRunning, true; got != want {
+			t.Errorf("entry 2 IsRunning=%t, want=%t", got, want)
 		}
 
 		// Verify third entry is locked
-		if entries[2].IsLocked != true {
-			t.Errorf("expected entry 3 to be locked")
+		if got, want := entries[2].IsLocked, true; got != want {
+			t.Errorf("entry 3 IsLocked=%t, want=%t", got, want)
 		}
 	})
 
@@ -677,8 +673,8 @@ func TestFetchTimeEntries(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(entries) != 0 {
-			t.Errorf("expected 0 time entries, got %d", len(entries))
+		if got, want := len(entries), 0; got != want {
+			t.Errorf("len(entries)=%d, want=%d", got, want)
 		}
 	})
 
@@ -726,12 +722,12 @@ func TestFetchTimeEntries(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if len(entries) != 3 {
-			t.Errorf("expected 3 time entries from pagination, got %d", len(entries))
+		if got, want := len(entries), 3; got != want {
+			t.Errorf("len(entries)=%d, want=%d", got, want)
 		}
 
-		if requestCount != 2 {
-			t.Errorf("expected 2 requests for pagination, got %d", requestCount)
+		if got, want := requestCount, 2; got != want {
+			t.Errorf("request count=%d, want=%d", got, want)
 		}
 	})
 }
@@ -739,16 +735,16 @@ func TestFetchTimeEntries(t *testing.T) {
 func TestCreateTimeEntry(t *testing.T) {
 	t.Run("given valid time entry data when CreateTimeEntry called then creates entry and returns it", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/v2/time_entries" {
-				t.Errorf("expected path /v2/time_entries, got %s", r.URL.Path)
+			if got, want := r.URL.Path, "/v2/time_entries"; got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodPost {
-				t.Errorf("expected method POST, got %s", r.Method)
+			if got, want := r.Method, http.MethodPost; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 
 			// Verify Content-Type header
-			if r.Header.Get("Content-Type") != "application/json" {
-				t.Errorf("expected Content-Type application/json, got %s", r.Header.Get("Content-Type"))
+			if got, want := r.Header.Get("Content-Type"), "application/json"; got != want {
+				t.Errorf("Content-Type header=%s, want=%s", got, want)
 			}
 
 			// Verify request body
@@ -757,7 +753,7 @@ func TestCreateTimeEntry(t *testing.T) {
 				t.Fatalf("failed to decode request body: %v", err)
 			}
 
-			expectedFields := map[string]interface{}{
+			wantFields := map[string]interface{}{
 				"project_id": float64(100),
 				"task_id":    float64(200),
 				"spent_date": "2025-01-15",
@@ -765,9 +761,9 @@ func TestCreateTimeEntry(t *testing.T) {
 				"notes":      "Code review session",
 			}
 
-			for field, expectedValue := range expectedFields {
-				if reqData[field] != expectedValue {
-					t.Errorf("expected %s=%v, got %v", field, expectedValue, reqData[field])
+			for field, want := range wantFields {
+				if got := reqData[field]; got != want {
+					t.Errorf("%s=%v, want=%v", field, got, want)
 				}
 			}
 
@@ -813,23 +809,23 @@ func TestCreateTimeEntry(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if created.ID != 1001 {
-			t.Errorf("expected ID 1001, got %d", created.ID)
+		if got, want := created.ID, 1001; got != want {
+			t.Errorf("created.ID=%d, want=%d", got, want)
 		}
-		if created.SpentDate != "2025-01-15" {
-			t.Errorf("expected spent_date 2025-01-15, got %s", created.SpentDate)
+		if got, want := created.SpentDate, "2025-01-15"; got != want {
+			t.Errorf("created.SpentDate=%s, want=%s", got, want)
 		}
-		if created.Hours != 1.5 {
-			t.Errorf("expected hours 1.5, got %f", created.Hours)
+		if got, want := created.Hours, 1.5; got != want {
+			t.Errorf("created.Hours=%f, want=%f", got, want)
 		}
-		if created.Notes != "Code review session" {
-			t.Errorf("expected notes 'Code review session', got '%s'", created.Notes)
+		if got, want := created.Notes, "Code review session"; got != want {
+			t.Errorf("created.Notes=%s, want=%s", got, want)
 		}
-		if created.Project.ID != 100 {
-			t.Errorf("expected project ID 100, got %d", created.Project.ID)
+		if got, want := created.Project.ID, 100; got != want {
+			t.Errorf("created.Project.ID=%d, want=%d", got, want)
 		}
-		if created.Task.ID != 200 {
-			t.Errorf("expected task ID 200, got %d", created.Task.ID)
+		if got, want := created.Task.ID, 200; got != want {
+			t.Errorf("created.Task.ID=%d, want=%d", got, want)
 		}
 	})
 
@@ -840,8 +836,8 @@ func TestCreateTimeEntry(t *testing.T) {
 				t.Fatalf("failed to decode request body: %v", err)
 			}
 
-			if reqData["billable"] != false {
-				t.Errorf("expected billable=false, got %v", reqData["billable"])
+			if got, want := reqData["billable"], false; got != want {
+				t.Errorf("billable=%v, want=%v", got, want)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -876,8 +872,8 @@ func TestCreateTimeEntry(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if created.IsBillable != false {
-			t.Errorf("expected billable false, got %t", created.IsBillable)
+		if got, want := created.IsBillable, false; got != want {
+			t.Errorf("created.IsBillable=%t, want=%t", got, want)
 		}
 	})
 
@@ -908,8 +904,8 @@ func TestCreateTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", created)
 		}
 
-		if !strings.Contains(err.Error(), "400") {
-			t.Errorf("expected 400 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "400"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -940,8 +936,8 @@ func TestCreateTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", created)
 		}
 
-		if !strings.Contains(err.Error(), "401") {
-			t.Errorf("expected 401 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "401"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 }
@@ -950,17 +946,16 @@ func TestUpdateTimeEntry(t *testing.T) {
 	t.Run("given valid update data when UpdateTimeEntry called then updates entry and returns it", func(t *testing.T) {
 		entryID := 1001
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			expectedPath := fmt.Sprintf("/v2/time_entries/%d", entryID)
-			if r.URL.Path != expectedPath {
-				t.Errorf("expected path %s, got %s", expectedPath, r.URL.Path)
+			if got, want := r.URL.Path, fmt.Sprintf("/v2/time_entries/%d", entryID); got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodPatch {
-				t.Errorf("expected method PATCH, got %s", r.Method)
+			if got, want := r.Method, http.MethodPatch; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 
 			// Verify Content-Type header
-			if r.Header.Get("Content-Type") != "application/json" {
-				t.Errorf("expected Content-Type application/json, got %s", r.Header.Get("Content-Type"))
+			if got, want := r.Header.Get("Content-Type"), "application/json"; got != want {
+				t.Errorf("Content-Type header=%s, want=%s", got, want)
 			}
 
 			// Verify request body
@@ -969,14 +964,14 @@ func TestUpdateTimeEntry(t *testing.T) {
 				t.Fatalf("failed to decode request body: %v", err)
 			}
 
-			expectedFields := map[string]interface{}{
+			wantFields := map[string]interface{}{
 				"hours": 2.5,
 				"notes": "Updated notes",
 			}
 
-			for field, expectedValue := range expectedFields {
-				if reqData[field] != expectedValue {
-					t.Errorf("expected %s=%v, got %v", field, expectedValue, reqData[field])
+			for field, want := range wantFields {
+				if got := reqData[field]; got != want {
+					t.Errorf("%s=%v, want=%v", field, got, want)
 				}
 			}
 
@@ -1019,14 +1014,14 @@ func TestUpdateTimeEntry(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if updated.ID != 1001 {
-			t.Errorf("expected ID 1001, got %d", updated.ID)
+		if got, want := updated.ID, 1001; got != want {
+			t.Errorf("updated.ID=%d, want=%d", got, want)
 		}
-		if updated.Hours != 2.5 {
-			t.Errorf("expected hours 2.5, got %f", updated.Hours)
+		if got, want := updated.Hours, 2.5; got != want {
+			t.Errorf("updated.Hours=%f, want=%f", got, want)
 		}
-		if updated.Notes != "Updated notes" {
-			t.Errorf("expected notes 'Updated notes', got '%s'", updated.Notes)
+		if got, want := updated.Notes, "Updated notes"; got != want {
+			t.Errorf("updated.Notes=%s, want=%s", got, want)
 		}
 	})
 
@@ -1038,8 +1033,8 @@ func TestUpdateTimeEntry(t *testing.T) {
 				t.Fatalf("failed to decode request body: %v", err)
 			}
 
-			if reqData["billable"] != true {
-				t.Errorf("expected billable=true, got %v", reqData["billable"])
+			if got, want := reqData["billable"], true; got != want {
+				t.Errorf("billable=%v, want=%v", got, want)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -1066,8 +1061,8 @@ func TestUpdateTimeEntry(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if updated.IsBillable != true {
-			t.Errorf("expected billable true, got %t", updated.IsBillable)
+		if got, want := updated.IsBillable, true; got != want {
+			t.Errorf("updated.IsBillable=%t, want=%t", got, want)
 		}
 	})
 
@@ -1097,8 +1092,8 @@ func TestUpdateTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", updated)
 		}
 
-		if !strings.Contains(err.Error(), "400") {
-			t.Errorf("expected 400 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "400"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -1128,8 +1123,8 @@ func TestUpdateTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", updated)
 		}
 
-		if !strings.Contains(err.Error(), "404") {
-			t.Errorf("expected 404 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "404"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -1158,8 +1153,8 @@ func TestUpdateTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", updated)
 		}
 
-		if !strings.Contains(err.Error(), "401") {
-			t.Errorf("expected 401 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "401"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 }
@@ -1168,20 +1163,19 @@ func TestDeleteTimeEntry(t *testing.T) {
 	t.Run("given existing time entry when DeleteTimeEntry called then deletes entry successfully", func(t *testing.T) {
 		entryID := 1001
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			expectedPath := fmt.Sprintf("/v2/time_entries/%d", entryID)
-			if r.URL.Path != expectedPath {
-				t.Errorf("expected path %s, got %s", expectedPath, r.URL.Path)
+			if got, want := r.URL.Path, fmt.Sprintf("/v2/time_entries/%d", entryID); got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodDelete {
-				t.Errorf("expected method DELETE, got %s", r.Method)
+			if got, want := r.Method, http.MethodDelete; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 
 			// Verify auth headers are present
-			if r.Header.Get("Harvest-Account-Id") != "12345" {
-				t.Errorf("expected Harvest-Account-Id header 12345, got %s", r.Header.Get("Harvest-Account-Id"))
+			if got, want := r.Header.Get("Harvest-Account-Id"), "12345"; got != want {
+				t.Errorf("Harvest-Account-Id header=%s, want=%s", got, want)
 			}
-			if r.Header.Get("Authorization") != "Bearer test-token" {
-				t.Errorf("expected Authorization header Bearer test-token, got %s", r.Header.Get("Authorization"))
+			if got, want := r.Header.Get("Authorization"), "Bearer test-token"; got != want {
+				t.Errorf("Authorization header=%s, want=%s", got, want)
 			}
 
 			// DELETE typically returns 200 OK with empty response body
@@ -1217,8 +1211,8 @@ func TestDeleteTimeEntry(t *testing.T) {
 			t.Fatal("expected error, got nil")
 		}
 
-		if !strings.Contains(err.Error(), "400") {
-			t.Errorf("expected 400 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "400"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -1241,8 +1235,8 @@ func TestDeleteTimeEntry(t *testing.T) {
 			t.Fatal("expected error, got nil")
 		}
 
-		if !strings.Contains(err.Error(), "400") {
-			t.Errorf("expected 400 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "400"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -1265,8 +1259,8 @@ func TestDeleteTimeEntry(t *testing.T) {
 			t.Fatal("expected error, got nil")
 		}
 
-		if !strings.Contains(err.Error(), "404") {
-			t.Errorf("expected 404 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "404"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -1288,8 +1282,8 @@ func TestDeleteTimeEntry(t *testing.T) {
 			t.Fatal("expected error, got nil")
 		}
 
-		if !strings.Contains(err.Error(), "401") {
-			t.Errorf("expected 401 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "401"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 }
@@ -1298,20 +1292,19 @@ func TestRestartTimeEntry(t *testing.T) {
 	t.Run("given stopped time entry when RestartTimeEntry called then starts timer and returns updated entry", func(t *testing.T) {
 		entryID := 1001
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			expectedPath := fmt.Sprintf("/v2/time_entries/%d/restart", entryID)
-			if r.URL.Path != expectedPath {
-				t.Errorf("expected path %s, got %s", expectedPath, r.URL.Path)
+			if got, want := r.URL.Path, fmt.Sprintf("/v2/time_entries/%d/restart", entryID); got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodPatch {
-				t.Errorf("expected method PATCH, got %s", r.Method)
+			if got, want := r.Method, http.MethodPatch; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 
 			// Verify auth headers are present
-			if r.Header.Get("Harvest-Account-Id") != "12345" {
-				t.Errorf("expected Harvest-Account-Id header 12345, got %s", r.Header.Get("Harvest-Account-Id"))
+			if got, want := r.Header.Get("Harvest-Account-Id"), "12345"; got != want {
+				t.Errorf("Harvest-Account-Id header=%s, want=%s", got, want)
 			}
-			if r.Header.Get("Authorization") != "Bearer test-token" {
-				t.Errorf("expected Authorization header Bearer test-token, got %s", r.Header.Get("Authorization"))
+			if got, want := r.Header.Get("Authorization"), "Bearer test-token"; got != want {
+				t.Errorf("Authorization header=%s, want=%s", got, want)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -1348,11 +1341,11 @@ func TestRestartTimeEntry(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if entry.ID != 1001 {
-			t.Errorf("expected ID 1001, got %d", entry.ID)
+		if got, want := entry.ID, 1001; got != want {
+			t.Errorf("entry.ID=%d, want=%d", got, want)
 		}
-		if entry.IsRunning != true {
-			t.Errorf("expected IsRunning true, got %t", entry.IsRunning)
+		if got, want := entry.IsRunning, true; got != want {
+			t.Errorf("entry.IsRunning=%t, want=%t", got, want)
 		}
 	})
 
@@ -1378,8 +1371,8 @@ func TestRestartTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", entry)
 		}
 
-		if !strings.Contains(err.Error(), "400") {
-			t.Errorf("expected 400 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "400"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -1405,8 +1398,8 @@ func TestRestartTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", entry)
 		}
 
-		if !strings.Contains(err.Error(), "404") {
-			t.Errorf("expected 404 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "404"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 }
@@ -1415,20 +1408,19 @@ func TestStopTimeEntry(t *testing.T) {
 	t.Run("given running time entry when StopTimeEntry called then stops timer and returns updated entry", func(t *testing.T) {
 		entryID := 1001
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			expectedPath := fmt.Sprintf("/v2/time_entries/%d/stop", entryID)
-			if r.URL.Path != expectedPath {
-				t.Errorf("expected path %s, got %s", expectedPath, r.URL.Path)
+			if got, want := r.URL.Path, fmt.Sprintf("/v2/time_entries/%d/stop", entryID); got != want {
+				t.Errorf("path=%s, want=%s", got, want)
 			}
-			if r.Method != http.MethodPatch {
-				t.Errorf("expected method PATCH, got %s", r.Method)
+			if got, want := r.Method, http.MethodPatch; got != want {
+				t.Errorf("method=%s, want=%s", got, want)
 			}
 
 			// Verify auth headers are present
-			if r.Header.Get("Harvest-Account-Id") != "12345" {
-				t.Errorf("expected Harvest-Account-Id header 12345, got %s", r.Header.Get("Harvest-Account-Id"))
+			if got, want := r.Header.Get("Harvest-Account-Id"), "12345"; got != want {
+				t.Errorf("Harvest-Account-Id header=%s, want=%s", got, want)
 			}
-			if r.Header.Get("Authorization") != "Bearer test-token" {
-				t.Errorf("expected Authorization header Bearer test-token, got %s", r.Header.Get("Authorization"))
+			if got, want := r.Header.Get("Authorization"), "Bearer test-token"; got != want {
+				t.Errorf("Authorization header=%s, want=%s", got, want)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -1465,14 +1457,14 @@ func TestStopTimeEntry(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		if entry.ID != 1001 {
-			t.Errorf("expected ID 1001, got %d", entry.ID)
+		if got, want := entry.ID, 1001; got != want {
+			t.Errorf("entry.ID=%d, want=%d", got, want)
 		}
-		if entry.IsRunning != false {
-			t.Errorf("expected IsRunning false, got %t", entry.IsRunning)
+		if got, want := entry.IsRunning, false; got != want {
+			t.Errorf("entry.IsRunning=%t, want=%t", got, want)
 		}
-		if entry.Hours != 3.25 {
-			t.Errorf("expected hours 3.25, got %f", entry.Hours)
+		if got, want := entry.Hours, 3.25; got != want {
+			t.Errorf("entry.Hours=%f, want=%f", got, want)
 		}
 	})
 
@@ -1498,8 +1490,8 @@ func TestStopTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", entry)
 		}
 
-		if !strings.Contains(err.Error(), "400") {
-			t.Errorf("expected 400 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "400"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -1525,8 +1517,8 @@ func TestStopTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", entry)
 		}
 
-		if !strings.Contains(err.Error(), "400") {
-			t.Errorf("expected 400 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "400"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 
@@ -1552,8 +1544,8 @@ func TestStopTimeEntry(t *testing.T) {
 			t.Errorf("expected nil time entry, got %v", entry)
 		}
 
-		if !strings.Contains(err.Error(), "404") {
-			t.Errorf("expected 404 status in error, got: %s", err.Error())
+		if got, want := err.Error(), "404"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
 		}
 	})
 }
@@ -1574,8 +1566,8 @@ func TestAggregateProjectsWithTasks(t *testing.T) {
 
 		result := AggregateProjectsWithTasks(projects, taskAssignments)
 
-		if len(result) != 3 {
-			t.Fatalf("expected 3 project entries, got %d", len(result))
+		if got, want := len(result), 3; got != want {
+			t.Fatalf("len(result)=%d, want=%d", got, want)
 		}
 
 		// Verify first project has 2 tasks
@@ -1583,8 +1575,8 @@ func TestAggregateProjectsWithTasks(t *testing.T) {
 		for _, pe := range result {
 			if pe.Project.ID == 1 {
 				found = true
-				if len(pe.Tasks) != 2 {
-					t.Errorf("expected project 1 to have 2 tasks, got %d", len(pe.Tasks))
+				if got, want := len(pe.Tasks), 2; got != want {
+					t.Errorf("project 1 task count=%d, want=%d", got, want)
 				}
 			}
 		}
@@ -1597,8 +1589,8 @@ func TestAggregateProjectsWithTasks(t *testing.T) {
 		for _, pe := range result {
 			if pe.Project.ID == 2 {
 				found = true
-				if len(pe.Tasks) != 1 {
-					t.Errorf("expected project 2 to have 1 task, got %d", len(pe.Tasks))
+				if got, want := len(pe.Tasks), 1; got != want {
+					t.Errorf("project 2 task count=%d, want=%d", got, want)
 				}
 			}
 		}
@@ -1621,29 +1613,29 @@ func TestAggregateProjectsWithTasks(t *testing.T) {
 
 		result := AggregateProjectsWithTasks(projects, taskAssignments)
 
-		if len(result) != 3 {
-			t.Fatalf("expected 3 project entries, got %d", len(result))
+		if got, want := len(result), 3; got != want {
+			t.Fatalf("len(result)=%d, want=%d", got, want)
 		}
 
 		// First should be Acme Corp - API Development
-		if result[0].Project.Client.Name != "Acme Corp" {
-			t.Errorf("expected first entry to be Acme Corp, got %s", result[0].Project.Client.Name)
+		if got, want := result[0].Project.Client.Name, "Acme Corp"; got != want {
+			t.Errorf("first entry client=%s, want=%s", got, want)
 		}
-		if result[0].Project.Name != "API Development" {
-			t.Errorf("expected first project name to be API Development, got %s", result[0].Project.Name)
+		if got, want := result[0].Project.Name, "API Development"; got != want {
+			t.Errorf("first entry project=%s, want=%s", got, want)
 		}
 
 		// Second should be Acme Corp - Mobile App
-		if result[1].Project.Client.Name != "Acme Corp" {
-			t.Errorf("expected second entry to be Acme Corp, got %s", result[1].Project.Client.Name)
+		if got, want := result[1].Project.Client.Name, "Acme Corp"; got != want {
+			t.Errorf("second entry client=%s, want=%s", got, want)
 		}
-		if result[1].Project.Name != "Mobile App" {
-			t.Errorf("expected second project name to be Mobile App, got %s", result[1].Project.Name)
+		if got, want := result[1].Project.Name, "Mobile App"; got != want {
+			t.Errorf("second entry project=%s, want=%s", got, want)
 		}
 
 		// Third should be BigCo Industries - Zebra Project
-		if result[2].Project.Client.Name != "BigCo Industries" {
-			t.Errorf("expected third entry to be BigCo Industries, got %s", result[2].Project.Client.Name)
+		if got, want := result[2].Project.Client.Name, "BigCo Industries"; got != want {
+			t.Errorf("third entry client=%s, want=%s", got, want)
 		}
 	})
 
@@ -1659,19 +1651,19 @@ func TestAggregateProjectsWithTasks(t *testing.T) {
 		result := AggregateProjectsWithTasks(projects, taskAssignments)
 
 		// Only project with tasks should be included
-		if len(result) != 1 {
-			t.Fatalf("expected 1 project entry, got %d", len(result))
+		if got, want := len(result), 1; got != want {
+			t.Fatalf("len(result)=%d, want=%d", got, want)
 		}
-		if result[0].Project.ID != 1 {
-			t.Errorf("expected project ID 1, got %d", result[0].Project.ID)
+		if got, want := result[0].Project.ID, 1; got != want {
+			t.Errorf("project ID=%d, want=%d", got, want)
 		}
 	})
 
 	t.Run("given empty inputs when aggregated then returns empty slice", func(t *testing.T) {
 		result := AggregateProjectsWithTasks([]Project{}, []TaskAssignment{})
 
-		if len(result) != 0 {
-			t.Errorf("expected 0 project entries, got %d", len(result))
+		if got, want := len(result), 0; got != want {
+			t.Errorf("len(result)=%d, want=%d", got, want)
 		}
 	})
 }
