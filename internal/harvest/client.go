@@ -142,6 +142,27 @@ type CreateTimeEntryRequest struct {
 	IsBillable *bool   `json:"billable,omitempty"`
 }
 
+// Validate checks that the required fields are present and well-formed
+// before the request is sent to the API.
+func (r CreateTimeEntryRequest) Validate() error {
+	if r.ProjectID <= 0 {
+		return fmt.Errorf("project_id is required")
+	}
+	if r.TaskID <= 0 {
+		return fmt.Errorf("task_id is required")
+	}
+	if r.SpentDate == "" {
+		return fmt.Errorf("spent_date is required")
+	}
+	if err := validateDate(r.SpentDate); err != nil {
+		return err
+	}
+	if r.Hours < 0 {
+		return fmt.Errorf("hours must not be negative")
+	}
+	return nil
+}
+
 // UpdateTimeEntryRequest represents the request payload for updating a time entry.
 type UpdateTimeEntryRequest struct {
 	ProjectID  *int     `json:"project_id,omitempty"`
@@ -150,6 +171,35 @@ type UpdateTimeEntryRequest struct {
 	Hours      *float64 `json:"hours,omitempty"`
 	Notes      *string  `json:"notes,omitempty"`
 	IsBillable *bool    `json:"billable,omitempty"`
+}
+
+// Validate checks that any fields set on the update are well-formed before
+// the request is sent to the API.
+func (r UpdateTimeEntryRequest) Validate() error {
+	if r.ProjectID != nil && *r.ProjectID <= 0 {
+		return fmt.Errorf("project_id must be positive")
+	}
+	if r.TaskID != nil && *r.TaskID <= 0 {
+		return fmt.Errorf("task_id must be positive")
+	}
+	if r.SpentDate != nil {
+		if err := validateDate(*r.SpentDate); err != nil {
+			return err
+		}
+	}
+	if r.Hours != nil && *r.Hours < 0 {
+		return fmt.Errorf("hours must not be negative")
+	}
+	return nil
+}
+
+// validateDate checks that a date string is in the YYYY-MM-DD format the
+// Harvest API expects for spent_date.
+func validateDate(s string) error {
+	if _, err := time.Parse("2006-01-02", s); err != nil {
+		return fmt.Errorf("invalid spent_date %q: expected YYYY-MM-DD", s)
+	}
+	return nil
 }
 
 // AggregateProjectsWithTasks combines projects and task assignments into a sorted list.
@@ -466,6 +516,9 @@ func (c *Client) FetchTimeEntries(ctx context.Context, from, to string) ([]TimeE
 // CreateTimeEntry creates a new time entry in Harvest.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
 func (c *Client) CreateTimeEntry(ctx context.Context, request CreateTimeEntryRequest) (*TimeEntry, error) {
+	if err := request.Validate(); err != nil {
+		return nil, err
+	}
 	resp, err := c.Post(ctx, "/v2/time_entries", request)
 	if err != nil {
 		return nil, fmt.Errorf("network request failed: %w", err)
@@ -487,6 +540,9 @@ func (c *Client) CreateTimeEntry(ctx context.Context, request CreateTimeEntryReq
 // UpdateTimeEntry updates an existing time entry in Harvest.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
 func (c *Client) UpdateTimeEntry(ctx context.Context, id int, request UpdateTimeEntryRequest) (*TimeEntry, error) {
+	if err := request.Validate(); err != nil {
+		return nil, err
+	}
 	path := fmt.Sprintf("/v2/time_entries/%d", id)
 	resp, err := c.Patch(ctx, path, request)
 	if err != nil {

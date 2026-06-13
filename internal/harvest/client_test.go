@@ -879,12 +879,12 @@ func TestCreateTimeEntry(t *testing.T) {
 		}
 	})
 
-	t.Run("given invalid request when CreateTimeEntry called then returns error", func(t *testing.T) {
+	t.Run("given a request the server rejects when CreateTimeEntry called then returns error", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]any{
-				"message": "The project_id field is required.",
+				"message": "The project is archived.",
 			})
 		}))
 		defer server.Close()
@@ -893,6 +893,7 @@ func TestCreateTimeEntry(t *testing.T) {
 		client.SetBaseURL(server.URL)
 
 		entry := CreateTimeEntryRequest{
+			ProjectID: 999,
 			TaskID:    200,
 			SpentDate: "2025-01-15",
 			Hours:     1.0,
@@ -1819,4 +1820,81 @@ func TestContextCancellation(t *testing.T) {
 			t.Errorf("error=%v, want %v", got, want)
 		}
 	})
+}
+
+// failIfCalled returns a test server that fails the test if any request
+// reaches it, for asserting that validation rejects requests client-side.
+func failIfCalled(t *testing.T) *httptest.Server {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Errorf("unexpected request to %s %s; validation should have failed first", r.Method, r.URL.Path)
+	}))
+	t.Cleanup(server.Close)
+	return server
+}
+
+func TestCreateTimeEntryValidation(t *testing.T) {
+	valid := CreateTimeEntryRequest{ProjectID: 100, TaskID: 200, SpentDate: "2026-06-12", Hours: 1.5}
+
+	cases := []struct {
+		name    string
+		mutate  func(*CreateTimeEntryRequest)
+		wantErr string
+	}{
+		{"given a missing project ID then it is rejected", func(r *CreateTimeEntryRequest) { r.ProjectID = 0 }, "project_id is required"},
+		{"given a missing task ID then it is rejected", func(r *CreateTimeEntryRequest) { r.TaskID = 0 }, "task_id is required"},
+		{"given a missing spent date then it is rejected", func(r *CreateTimeEntryRequest) { r.SpentDate = "" }, "spent_date is required"},
+		{"given a malformed spent date then it is rejected", func(r *CreateTimeEntryRequest) { r.SpentDate = "06/12/2026" }, "expected YYYY-MM-DD"},
+		{"given negative hours then it is rejected", func(r *CreateTimeEntryRequest) { r.Hours = -1 }, "hours must not be negative"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			server := failIfCalled(t)
+			client := NewClient("12345", "test-token")
+			client.SetBaseURL(server.URL)
+
+			req := valid
+			tc.mutate(&req)
+
+			_, err := client.CreateTimeEntry(t.Context(), req)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+			if got, want := err.Error(), tc.wantErr; !strings.Contains(got, want) {
+				t.Errorf("error=%q, want substring %q", got, want)
+			}
+		})
+	}
+}
+
+func TestUpdateTimeEntryValidation(t *testing.T) {
+	intPtr := func(v int) *int { return &v }
+	floatPtr := func(v float64) *float64 { return &v }
+	strPtr := func(v string) *string { return &v }
+
+	cases := []struct {
+		name    string
+		req     UpdateTimeEntryRequest
+		wantErr string
+	}{
+		{"given a zero project ID then it is rejected", UpdateTimeEntryRequest{ProjectID: intPtr(0)}, "project_id must be positive"},
+		{"given a zero task ID then it is rejected", UpdateTimeEntryRequest{TaskID: intPtr(0)}, "task_id must be positive"},
+		{"given a malformed spent date then it is rejected", UpdateTimeEntryRequest{SpentDate: strPtr("June 12")}, "expected YYYY-MM-DD"},
+		{"given negative hours then it is rejected", UpdateTimeEntryRequest{Hours: floatPtr(-0.5)}, "hours must not be negative"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			server := failIfCalled(t)
+			client := NewClient("12345", "test-token")
+			client.SetBaseURL(server.URL)
+
+			_, err := client.UpdateTimeEntry(t.Context(), 1001, tc.req)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+			if got, want := err.Error(), tc.wantErr; !strings.Contains(got, want) {
+				t.Errorf("error=%q, want substring %q", got, want)
+			}
+		})
+	}
 }
