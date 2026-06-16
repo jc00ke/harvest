@@ -70,7 +70,7 @@ trap 'echo "verification failed, artifacts left in $tmpdir for inspection" >&2' 
 
 echo "Downloading $version artifacts to $tmpdir"
 gh release download "$version" -R "$repo" \
-  -p '*.tar.gz' -p 'checksums.txt' -p 'checksums.txt.sig' -p 'checksums.txt.pem' \
+  -p '*.tar.gz' -p 'checksums.txt' -p 'checksums.txt.bundle' \
   -D "$tmpdir"
 
 for artifact in "$tmpdir"/*.tar.gz; do
@@ -79,8 +79,7 @@ done
 
 echo "Verifying cosign signature on checksums.txt"
 cosign verify-blob \
-  --certificate "$tmpdir/checksums.txt.pem" \
-  --signature "$tmpdir/checksums.txt.sig" \
+  --bundle "$tmpdir/checksums.txt.bundle" \
   --certificate-identity-regexp "^https://github.com/$repo/.github/workflows/release.yml@" \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   "$tmpdir/checksums.txt"

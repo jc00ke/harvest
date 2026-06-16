@@ -52,14 +52,13 @@ checksum:
 # Keyless cosign signing of the checksums file. One signature covers every
 # archive transitively. The OIDC token comes from the release workflow's
 # id-token: write permission; --yes is required for non-interactive signing.
+# cosign 3 writes signature + certificate into a single Sigstore bundle.
 signs:
   - cmd: cosign
-    signature: "${artifact}.sig"
-    certificate: "${artifact}.pem"
+    signature: "${artifact}.bundle"
     args:
       - sign-blob
-      - "--output-signature=${signature}"
-      - "--output-certificate=${certificate}"
+      - "--bundle=${signature}"
       - "${artifact}"
       - "--yes"
     artifacts: checksum
