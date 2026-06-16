@@ -24,5 +24,27 @@ archives:
       - LICENSE
       - completions/*
 
+homebrew_casks:
+  - name: harvest
+    repository:
+      owner: jc00ke
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/jc00ke/harvest"
+    description: "A command-line tool for managing your Harvest time entries, projects, and tasks"
+    license: "MIT"
+    completions:
+      bash: "completions/harvest.bash"
+      zsh: "completions/harvest.zsh"
+      fish: "completions/harvest.fish"
+    # The release binaries are attested via GitHub but not Apple-signed, so
+    # macOS quarantines them. Strip the quarantine attribute on install.
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/harvest"]
+          end
+
 changelog:
   sort: asc
