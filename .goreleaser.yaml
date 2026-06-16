@@ -46,5 +46,24 @@ homebrew_casks:
             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/harvest"]
           end
 
+checksum:
+  name_template: "checksums.txt"
+
+# Keyless cosign signing of the checksums file. One signature covers every
+# archive transitively. The OIDC token comes from the release workflow's
+# id-token: write permission; --yes is required for non-interactive signing.
+signs:
+  - cmd: cosign
+    signature: "${artifact}.sig"
+    certificate: "${artifact}.pem"
+    args:
+      - sign-blob
+      - "--output-signature=${signature}"
+      - "--output-certificate=${certificate}"
+      - "${artifact}"
+      - "--yes"
+    artifacts: checksum
+    output: true
+
 changelog:
   sort: asc

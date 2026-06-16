@@ -2,6 +2,7 @@
 go = "1.26.4"
 goreleaser = "latest"
 usage = "latest"
+cosign = "latest"
 
 [tasks.build]
 run = "go build -o bin/harvest ./cmd/harvest"
@@ -68,11 +69,21 @@ tmpdir=$(mktemp -d)
 trap 'echo "verification failed, artifacts left in $tmpdir for inspection" >&2' ERR
 
 echo "Downloading $version artifacts to $tmpdir"
-gh release download "$version" -R "$repo" -p '*.tar.gz' -D "$tmpdir"
+gh release download "$version" -R "$repo" \
+  -p '*.tar.gz' -p 'checksums.txt' -p 'checksums.txt.sig' -p 'checksums.txt.pem' \
+  -D "$tmpdir"
 
 for artifact in "$tmpdir"/*.tar.gz; do
   gh attestation verify "$artifact" -R "$repo"
 done
+
+echo "Verifying cosign signature on checksums.txt"
+cosign verify-blob \
+  --certificate "$tmpdir/checksums.txt.pem" \
+  --signature "$tmpdir/checksums.txt.sig" \
+  --certificate-identity-regexp "^https://github.com/$repo/.github/workflows/release.yml@" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  "$tmpdir/checksums.txt"
 
 rm -rf "$tmpdir"
 echo "All $version artifacts verified, cleaned up $tmpdir"
