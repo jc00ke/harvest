@@ -48,8 +48,8 @@ DEFVER=1
 ARCHS_SUPPORTED="amd64 arm64"
 get_github_releases "jc00ke/harvest" "latest"
 if [ "${ACTION}" != prettylist ]; then
-    URL=$(grep -m 1 "browser_download_url.*_linux_${ARCH}\.deb\"" "${CACHE_FILE}" | cut -d'"' -f4)
-    VERSION_PUBLISHED=$(echo "${URL}" | grep -oP 'v\K[^/]+')
+    URL=$(grep -m 1 "browser_download_url.*_linux_${HOST_ARCH}\.deb\"" "${CACHE_FILE}" | cut -d'"' -f4)
+    VERSION_PUBLISHED=$(grep -oP 'download/v\K[^/]+' <<< "${URL}")
 fi
 PRETTY_NAME="harvest"
 WEBSITE="https://github.com/jc00ke/harvest"
