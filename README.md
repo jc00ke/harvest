@@ -24,6 +24,43 @@ curl -sL https://github.com/jc00ke/harvest/releases/latest/download/harvest_darw
 sudo mv harvest /usr/local/bin/
 ```
 
+### Verifying a Release
+
+Release artifacts are signed two ways, both backed by [Sigstore](https://www.sigstore.dev/):
+
+- **Build provenance** — every archive carries a GitHub attestation tying it to
+  the workflow run that built it.
+- **Signed checksums** — `checksums.txt` is keyless-signed with
+  [cosign](https://github.com/sigstore/cosign), with the signature and
+  certificate published together as `checksums.txt.bundle`.
+
+Verify an archive's provenance with the [GitHub CLI](https://cli.github.com/)
+(no extra tooling required):
+
+```bash
+gh attestation verify harvest_darwin_arm64.tar.gz -R jc00ke/harvest
+```
+
+Verify the signed checksums with cosign, then check your download against them:
+
+```bash
+# Download the checksums and their signature bundle (e.g. for v0.4.1)
+gh release download v0.4.1 -R jc00ke/harvest -p 'checksums.txt' -p 'checksums.txt.bundle'
+
+# Confirm the checksums were signed by this repo's release workflow
+cosign verify-blob \
+  --bundle checksums.txt.bundle \
+  --certificate-identity-regexp '^https://github.com/jc00ke/harvest/.github/workflows/release.yml@' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  checksums.txt
+
+# Confirm your downloaded archive matches the verified checksums
+sha256sum --ignore-missing -c checksums.txt
+```
+
+If you have the repo checked out, `mise run release:verify v0.4.1` runs all of
+the above against a published release in one step.
+
 ### Install with Go
 
 ```bash
@@ -250,7 +287,9 @@ mise provides `vhs` and `ffmpeg`; install `ttyd` separately (`brew install ttyd`
 mise run release v0.1.0
 ```
 
-Releases now support attestations.
+Releases are signed with build provenance attestations and a cosign-signed
+checksums file; see [Verifying a Release](#verifying-a-release) for how to
+check them.
 
 ## Disclaimer
 
