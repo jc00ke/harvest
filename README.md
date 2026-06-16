@@ -24,6 +24,42 @@ curl -sL https://github.com/jc00ke/harvest/releases/latest/download/harvest_darw
 sudo mv harvest /usr/local/bin/
 ```
 
+### Debian / Ubuntu (`.deb`)
+
+Download the `.deb` for your architecture from the [Releases page](https://github.com/jc00ke/harvest/releases) and install it with `apt`:
+
+```bash
+# Example for x86_64 (use harvest_..._arm64.deb on ARM)
+curl -sLO https://github.com/jc00ke/harvest/releases/latest/download/harvest_linux_amd64.deb
+sudo apt install ./harvest_linux_amd64.deb
+```
+
+This installs the binary to `/usr/bin/harvest` and shell completions to the
+standard system locations. To upgrade later, install the newer `.deb` the same
+way; to remove it, run `sudo apt remove harvest`.
+
+Alternatively, [`deb-get`](https://github.com/wimpysworld/deb-get) can install
+the `.deb` and keep it updated from GitHub releases. `harvest` isn't in
+deb-get's built-in catalog, so add a local package definition first:
+
+```bash
+sudo tee /etc/deb-get/99-local.d/harvest >/dev/null <<'EOF'
+DEFVER=1
+ARCHS_SUPPORTED="amd64 arm64"
+get_github_releases "jc00ke/harvest" "latest"
+if [ "${ACTION}" != prettylist ]; then
+    URL=$(grep -m 1 "browser_download_url.*_linux_${ARCH}\.deb\"" "${CACHE_FILE}" | cut -d'"' -f4)
+    VERSION_PUBLISHED=$(echo "${URL}" | grep -oP 'v\K[^/]+')
+fi
+PRETTY_NAME="harvest"
+WEBSITE="https://github.com/jc00ke/harvest"
+SUMMARY="A command-line tool for managing your Harvest time entries, projects, and tasks"
+EOF
+
+deb-get update
+deb-get install harvest
+```
+
 ### Verifying a Release
 
 Release artifacts are signed two ways, both backed by [Sigstore](https://www.sigstore.dev/):

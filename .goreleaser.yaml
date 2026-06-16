@@ -24,6 +24,23 @@ archives:
       - LICENSE
       - completions/*
 
+nfpms:
+  - package_name: harvest
+    formats: [deb]
+    maintainer: "Jesse Cooke <jcooke@duck.com>"
+    homepage: "https://github.com/jc00ke/harvest"
+    description: "A command-line tool for managing your Harvest time entries, projects, and tasks"
+    license: "MIT"
+    # Install shell completions to the standard system locations so they are
+    # picked up automatically by bash/zsh/fish.
+    contents:
+      - src: completions/harvest.bash
+        dst: /usr/share/bash-completion/completions/harvest.bash
+      - src: completions/harvest.zsh
+        dst: /usr/share/zsh/site-functions/_harvest
+      - src: completions/harvest.fish
+        dst: /usr/share/fish/vendor_completions.d/harvest.fish
+
 homebrew_casks:
   - name: harvest
     repository:

@@ -33,7 +33,9 @@ jobs:
       - name: Attest build provenance
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
-          subject-path: dist/*.tar.gz
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.deb
 
       - name: Warm Go module proxy
         run: GOPROXY=proxy.golang.org go list -m github.com/jc00ke/harvest@${{ github.ref_name }}
