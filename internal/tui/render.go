@@ -237,6 +237,10 @@ func (m Model) renderStyledTimeEntry(entry harvest.TimeEntry, isSelected bool, m
 		displayHours += elapsed
 	}
 
+	// formatHoursSimple renders HH:MM (5 columns) for any duration under 100
+	// hours, which covers every per-entry value.
+	const durationCellWidth = 5
+
 	// Build styled components with optional selected background
 	var entryPath, styledDuration, indicator string
 	if isSelected {
@@ -247,40 +251,47 @@ func (m Model) renderStyledTimeEntry(entry harvest.TimeEntry, isSelected bool, m
 			ArrowStyle.Background(bg).Render(" → ") +
 			TaskStyle.Background(bg).Render(taskName)
 
+		// Durations are a constant HH:MM width, so the cell is sized to fit
+		// exactly (no internal padding between the indicator and the digits).
 		if entry.IsRunning {
-			styledDuration = RunningDurationStyle.Background(bg).Render(formatHoursSimple(displayHours))
+			styledDuration = RunningDurationStyle.Background(bg).Width(durationCellWidth).Render(formatHoursSimple(displayHours))
 		} else {
-			styledDuration = DurationStyle.Background(bg).Render(formatHoursSimple(displayHours))
+			styledDuration = DurationStyle.Background(bg).Width(durationCellWidth).Render(formatHoursSimple(displayHours))
 		}
 
+		// Indicator sits to the left of the duration. Its separating space is
+		// styled with the row background so it doesn't render as an unstyled gap
+		// on the highlighted row.
+		sep := lipgloss.NewStyle().Background(bg).Render(" ")
 		if entry.IsRunning {
-			indicator = " " + RunningDot.Background(bg).Render("●")
+			indicator = RunningDot.Background(bg).Render("●") + sep
 		} else if entry.IsLocked {
-			indicator = " " + LockedIcon.Background(bg).Render("🔒")
+			indicator = LockedIcon.Background(bg).Render("🔒") + sep
 		}
 	} else {
 		entryPath = RenderEntryPath(clientName, projectName, taskName)
 
 		if entry.IsRunning {
-			styledDuration = RunningDurationStyle.Render(formatHoursSimple(displayHours))
+			styledDuration = RunningDurationStyle.Width(durationCellWidth).Render(formatHoursSimple(displayHours))
 		} else if entry.IsLocked {
-			styledDuration = DurationStyle.Copy().Foreground(mutedText).Render(formatHoursSimple(displayHours))
+			styledDuration = DurationStyle.Copy().Foreground(mutedText).Width(durationCellWidth).Render(formatHoursSimple(displayHours))
 		} else {
-			styledDuration = DurationStyle.Render(formatHoursSimple(displayHours))
+			styledDuration = DurationStyle.Width(durationCellWidth).Render(formatHoursSimple(displayHours))
 		}
 
+		// Indicator sits to the left of the duration.
 		if entry.IsRunning {
-			indicator = " " + RunningDot.Render("●")
+			indicator = RunningDot.Render("●") + " "
 		} else if entry.IsLocked {
-			indicator = " " + LockedIcon.Render("🔒")
+			indicator = LockedIcon.Render("🔒") + " "
 		}
 	}
 
 	// Both row styles add 3 columns of left overhead (selected: 1 border + 2
 	// padding, unselected: 3 padding) and render to a total width of maxWidth,
 	// so the content area each holds is maxWidth-3. Right-align the
-	// duration+indicator within that area, reserving a trailing column so the
-	// running ● never abuts the box border. Sizing padding identically for both
+	// indicator+duration within that area, reserving a trailing column so the
+	// duration never abuts the box border. Sizing padding identically for both
 	// states keeps the duration column aligned regardless of selection.
 	const leftOverhead = 3
 	const trailingGap = 1
@@ -299,11 +310,11 @@ func (m Model) renderStyledTimeEntry(entry harvest.TimeEntry, isSelected bool, m
 		// Selected entry with accent bar and full-width background. Width is
 		// maxWidth-1 because the left border adds the remaining column.
 		bgSpacer := lipgloss.NewStyle().Background(selectedBg).Render(strings.Repeat(" ", padding))
-		entryContent := entryPath + bgSpacer + styledDuration + indicator
+		entryContent := entryPath + bgSpacer + indicator + styledDuration
 		entryLine = SelectedEntry.Width(maxWidth - 1).Render(entryContent)
 	} else {
 		// Unselected entry with left padding.
-		entryContent := entryPath + strings.Repeat(" ", padding) + styledDuration + indicator
+		entryContent := entryPath + strings.Repeat(" ", padding) + indicator + styledDuration
 		if entry.IsLocked {
 			entryContent = LockedEntryStyle.Render(entryContent)
 		}

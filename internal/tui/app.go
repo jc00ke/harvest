@@ -472,11 +472,12 @@ func (m *Model) clearEditState() {
 	m.pendingTaskEdit = false
 }
 
-// formatHoursSimple formats hours as H:MM format.
+// formatHoursSimple formats hours as HH:MM format (hours zero-padded to two
+// digits) so durations have a constant width and align cleanly in the UI.
 func formatHoursSimple(hours float64) string {
 	h := int(hours)
 	m := int((hours - float64(h)) * 60)
-	return fmt.Sprintf("%d:%02d", h, m)
+	return fmt.Sprintf("%02d:%02d", h, m)
 }
 
 // truncateString truncates a string to the given max length, adding "..." if truncated.

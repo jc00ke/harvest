@@ -848,8 +848,8 @@ func TestEditEntryAction(t *testing.T) {
 			t.Errorf("expected editNotes to be 'Test notes', got '%s'", m.editNotes)
 		}
 
-		if m.editHours != "2:30" {
-			t.Errorf("expected editHours to be '2:30', got '%s'", m.editHours)
+		if m.editHours != "02:30" {
+			t.Errorf("expected editHours to be '02:30', got '%s'", m.editHours)
 		}
 
 		if m.editBillable != true {

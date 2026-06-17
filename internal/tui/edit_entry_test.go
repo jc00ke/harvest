@@ -53,8 +53,8 @@ func TestEditEntry(t *testing.T) {
 		if updatedModel.(Model).editNotes != "Test entry" {
 			t.Errorf("expected editNotes to be 'Test entry', got '%s'", updatedModel.(Model).editNotes)
 		}
-		if updatedModel.(Model).editHours != "1:30" {
-			t.Errorf("expected editHours to be '1:30', got '%s'", updatedModel.(Model).editHours)
+		if updatedModel.(Model).editHours != "01:30" {
+			t.Errorf("expected editHours to be '01:30', got '%s'", updatedModel.(Model).editHours)
 		}
 		if !updatedModel.(Model).editBillable {
 			t.Error("expected editBillable to be true")

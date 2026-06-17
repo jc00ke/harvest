@@ -212,12 +212,12 @@ func TestFormatHoursSimple(t *testing.T) {
 		hours    float64
 		expected string
 	}{
-		{"given zero hours when formatted then returns 0:00", 0.0, "0:00"},
-		{"given one hour when formatted then returns 1:00", 1.0, "1:00"},
-		{"given half hour when formatted then returns 0:30", 0.5, "0:30"},
-		{"given 1.5 hours when formatted then returns 1:30", 1.5, "1:30"},
-		{"given quarter hour when formatted then returns 0:15", 0.25, "0:15"},
-		{"given 8.75 hours when formatted then returns 8:45", 8.75, "8:45"},
+		{"given zero hours when formatted then returns 00:00", 0.0, "00:00"},
+		{"given one hour when formatted then returns 01:00", 1.0, "01:00"},
+		{"given half hour when formatted then returns 00:30", 0.5, "00:30"},
+		{"given 1.5 hours when formatted then returns 01:30", 1.5, "01:30"},
+		{"given quarter hour when formatted then returns 00:15", 0.25, "00:15"},
+		{"given 8.75 hours when formatted then returns 08:45", 8.75, "08:45"},
 		{"given 10+ hours when formatted then returns correct format", 12.5, "12:30"},
 	}
 
