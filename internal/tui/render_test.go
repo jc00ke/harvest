@@ -759,6 +759,78 @@ func TestNavigationClearsStatusMessage(t *testing.T) {
 	})
 }
 
+func TestStyledTimeEntryAlignment(t *testing.T) {
+	makeEntry := func(running bool) harvest.TimeEntry {
+		return harvest.TimeEntry{
+			Hours:     0.5,
+			IsRunning: running,
+			Client:    harvest.TimeEntryClient{Name: "Acme"},
+			Project:   harvest.TimeEntryProject{Name: "Website Redesign"},
+			Task:      harvest.TimeEntryTask{Name: "Programming"},
+		}
+	}
+
+	t.Run("given selected and unselected entries then first line has equal width", func(t *testing.T) {
+		m := newTestModel()
+		m.width = 110
+		maxWidth := m.shellWidth() - 4
+
+		selected := strings.Split(m.renderStyledTimeEntry(makeEntry(true), true, maxWidth), "\n")[1]
+		unselected := strings.Split(m.renderStyledTimeEntry(makeEntry(true), false, maxWidth), "\n")[0]
+
+		if got, want := lipgloss.Width(selected), lipgloss.Width(unselected); got != want {
+			t.Errorf("selected width=%d, unselected width=%d, want equal", got, want)
+		}
+	})
+
+	t.Run("given running entry then indicator does not touch the box edge", func(t *testing.T) {
+		m := newTestModel()
+		m.width = 110
+		maxWidth := m.shellWidth() - 4
+
+		line := strings.Split(m.renderStyledTimeEntry(makeEntry(true), true, maxWidth), "\n")[1]
+		if got, want := lipgloss.Width(line), maxWidth; got > want {
+			t.Errorf("selected line width=%d, want <= %d (must fit interior)", got, want)
+		}
+	})
+}
+
+func TestTruncateStyledLine(t *testing.T) {
+	t.Run("given styled line wider than max when truncated then visible width fits", func(t *testing.T) {
+		styled := ClientStyle.Render("Lorem ipsum dolor sit amet consectetur adipiscing elit sed do")
+		got := truncateStyledLine(styled, 20)
+		if got, want := lipgloss.Width(got), 20; got > want {
+			t.Errorf("truncated width=%d, want <= %d", got, want)
+		}
+	})
+
+	t.Run("given styled line within max when truncated then returned unchanged", func(t *testing.T) {
+		styled := ClientStyle.Render("short")
+		if got, want := truncateStyledLine(styled, 20), styled; got != want {
+			t.Errorf("truncated=%q, want=%q", got, want)
+		}
+	})
+
+	t.Run("given task select breadcrumb with long project name then box does not overflow", func(t *testing.T) {
+		model := newTestModel()
+		model.width = 110
+		model.currentView = ViewSelectTask
+		model.selectedProject = &harvest.Project{
+			Name:   "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod",
+			Client: harvest.ProjectClient{Name: "Acme"},
+		}
+
+		output := model.View()
+		lines := strings.Split(output, "\n")
+		topBorderWidth := lipgloss.Width(lines[0])
+		for i, line := range lines {
+			if got, want := lipgloss.Width(line), topBorderWidth; got != want {
+				t.Errorf("line %d width=%d, want=%d (overflow)\nline: %q", i, got, want, line)
+			}
+		}
+	})
+}
+
 func TestRenderKeybinding(t *testing.T) {
 	t.Run("given key and description when rendered then contains both", func(t *testing.T) {
 		result := RenderKeybinding("n", "new")

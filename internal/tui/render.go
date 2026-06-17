@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/jc00ke/harvest/internal/harvest"
 )
 
@@ -46,12 +47,14 @@ func (m Model) buildShellBox(content string, width int, footerKeys []string) str
 	boxedLines = append(boxedLines, borderStyle.Render(top))
 
 	for _, line := range lines {
-		lineWidth := lipgloss.Width(line)
 		padded := line
-		if lineWidth < width-2 {
-			padded = line + strings.Repeat(" ", width-2-lineWidth)
-		} else if lineWidth > width-2 {
-			padded = truncateStyledLine(line, width-2)
+		if lipgloss.Width(padded) > width-2 {
+			padded = truncateStyledLine(padded, width-2)
+		}
+		// Pad to the interior width so the right border stays aligned. Truncation
+		// may land a column short (e.g. when an ellipsis can't fully fill the gap).
+		if lineWidth := lipgloss.Width(padded); lineWidth < width-2 {
+			padded += strings.Repeat(" ", width-2-lineWidth)
 		}
 		boxedLines = append(boxedLines, borderStyle.Render("│")+padded+borderStyle.Render("│"))
 	}
@@ -273,11 +276,19 @@ func (m Model) renderStyledTimeEntry(entry harvest.TimeEntry, isSelected bool, m
 		}
 	}
 
-	// Calculate padding for alignment
+	// Both row styles add 3 columns of left overhead (selected: 1 border + 2
+	// padding, unselected: 3 padding) and render to a total width of maxWidth,
+	// so the content area each holds is maxWidth-3. Right-align the
+	// duration+indicator within that area, reserving a trailing column so the
+	// running ● never abuts the box border. Sizing padding identically for both
+	// states keeps the duration column aligned regardless of selection.
+	const leftOverhead = 3
+	const trailingGap = 1
+	contentWidth := maxWidth - leftOverhead
 	pathWidth := lipgloss.Width(entryPath)
 	durationWidth := lipgloss.Width(styledDuration)
 	indicatorWidth := lipgloss.Width(indicator)
-	padding := maxWidth - pathWidth - durationWidth - indicatorWidth - 4
+	padding := contentWidth - pathWidth - durationWidth - indicatorWidth - trailingGap
 	if padding < 1 {
 		padding = 1
 	}
@@ -285,17 +296,18 @@ func (m Model) renderStyledTimeEntry(entry harvest.TimeEntry, isSelected bool, m
 	// Build the entry line
 	var entryLine string
 	if isSelected {
-		// Selected entry with accent bar and full-width background
+		// Selected entry with accent bar and full-width background. Width is
+		// maxWidth-1 because the left border adds the remaining column.
 		bgSpacer := lipgloss.NewStyle().Background(selectedBg).Render(strings.Repeat(" ", padding))
 		entryContent := entryPath + bgSpacer + styledDuration + indicator
-		entryLine = SelectedEntry.Width(maxWidth).Render(entryContent)
+		entryLine = SelectedEntry.Width(maxWidth - 1).Render(entryContent)
 	} else {
-		// Unselected entry with left padding
+		// Unselected entry with left padding.
 		entryContent := entryPath + strings.Repeat(" ", padding) + styledDuration + indicator
 		if entry.IsLocked {
 			entryContent = LockedEntryStyle.Render(entryContent)
 		}
-		entryLine = UnselectedEntry.Render(entryContent)
+		entryLine = UnselectedEntry.Width(maxWidth).Render(entryContent)
 	}
 
 	lines = append(lines, entryLine)
@@ -310,15 +322,16 @@ func (m Model) renderStyledTimeEntry(entry harvest.TimeEntry, isSelected bool, m
 	return strings.Join(lines, "\n")
 }
 
-// truncateStyledLine truncates a styled line to fit within maxWidth
+// truncateStyledLine truncates a styled line to fit within maxWidth, preserving
+// ANSI styling and appending an ellipsis when the line is clipped.
 func truncateStyledLine(line string, maxWidth int) string {
-	// This is a simple implementation that may need refinement for complex styled text
 	if lipgloss.Width(line) <= maxWidth {
 		return line
 	}
-	// For now, return the line as-is if it contains styling
-	// A more sophisticated implementation would parse and preserve styles
-	return line
+	if maxWidth <= 1 {
+		return ansi.Truncate(line, maxWidth, "")
+	}
+	return ansi.Truncate(line, maxWidth, "…")
 }
 
 // max returns the maximum of two integers.
