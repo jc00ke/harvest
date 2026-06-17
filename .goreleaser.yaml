@@ -42,7 +42,8 @@ nfpms:
         dst: /usr/share/fish/vendor_completions.d/harvest.fish
 
 homebrew_casks:
-  - name: harvest
+  - name: harvest-cli
+    binaries: [harvest]
     repository:
       owner: jc00ke
       name: homebrew-tap

@@ -7,11 +7,11 @@ A command-line tool for managing your Harvest time entries, projects, and tasks,
 ### Homebrew (Recommended)
 
 ```bash
-brew install --cask jc00ke/tap/harvest
+brew install --cask jc00ke/tap/harvest-cli
 ```
 
 Homebrew installs shell completions automatically. To upgrade later, run
-`brew upgrade --cask harvest`.
+`brew upgrade --cask harvest-cli`. The installed command is still `harvest`.
 
 ### Download a Release Binary
 
