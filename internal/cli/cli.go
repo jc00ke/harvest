@@ -36,6 +36,7 @@ func NewRootCommand() *cobra.Command {
 		newMeCommand(),
 		newEntriesCommand(),
 		newProjectsCommand(),
+		newInvoiceCommand(),
 	)
 
 	return root

@@ -1898,3 +1898,199 @@ func TestUpdateTimeEntryValidation(t *testing.T) {
 		})
 	}
 }
+
+func TestFetchTeamTimeEntries(t *testing.T) {
+	teamEntriesResponse := func(entries []map[string]any) map[string]any {
+		return map[string]any{
+			"time_entries":  entries,
+			"per_page":      100,
+			"total_pages":   1,
+			"total_entries": len(entries),
+			"page":          1,
+		}
+	}
+
+	t.Run("given a project filter when FetchTeamTimeEntries called then requests project_id without user_id and decodes users", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if got, want := r.URL.Path, "/v2/time_entries"; got != want {
+				t.Errorf("path=%s, want=%s", got, want)
+			}
+			if got, want := r.URL.Query().Get("from"), "2026-06-01"; got != want {
+				t.Errorf("from query param=%s, want=%s", got, want)
+			}
+			if got, want := r.URL.Query().Get("to"), "2026-06-30"; got != want {
+				t.Errorf("to query param=%s, want=%s", got, want)
+			}
+			if got, want := r.URL.Query().Get("project_id"), "101"; got != want {
+				t.Errorf("project_id query param=%s, want=%s", got, want)
+			}
+			if got, want := r.URL.Query().Has("user_id"), false; got != want {
+				t.Errorf("user_id present=%t, want=%t", got, want)
+			}
+			if got, want := r.URL.Query().Has("client_id"), false; got != want {
+				t.Errorf("client_id present=%t, want=%t", got, want)
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(teamEntriesResponse([]map[string]any{
+				{
+					"id":         1,
+					"spent_date": "2026-06-15",
+					"hours":      1.5,
+					"billable":   true,
+					"user":       map[string]any{"id": 7, "name": "Alex Rivera"},
+					"client":     map[string]any{"id": 11, "name": "Acme Corp"},
+					"project":    map[string]any{"id": 101, "name": "Website Redesign"},
+					"task":       map[string]any{"id": 202, "name": "Development"},
+				},
+			}))
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+		client.SetUserID(123)
+
+		entries, err := client.FetchTeamTimeEntries(t.Context(), "2026-06-01", "2026-06-30", TeamTimeEntriesFilter{ProjectID: 101})
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := len(entries), 1; got != want {
+			t.Fatalf("len(entries)=%d, want=%d", got, want)
+		}
+		if got, want := entries[0].User.ID, 7; got != want {
+			t.Errorf("user ID=%d, want=%d", got, want)
+		}
+		if got, want := entries[0].User.Name, "Alex Rivera"; got != want {
+			t.Errorf("user name=%s, want=%s", got, want)
+		}
+	})
+
+	t.Run("given billable rates when FetchTeamTimeEntries called then decodes them treating null as zero", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(teamEntriesResponse([]map[string]any{
+				{
+					"id": 1, "spent_date": "2026-06-15", "hours": 2.0, "billable": true,
+					"billable_rate": 160.0,
+					"user":          map[string]any{"id": 7, "name": "Alex Rivera"},
+				},
+				{
+					"id": 2, "spent_date": "2026-06-15", "hours": 1.0, "billable": false,
+					"billable_rate": nil,
+					"user":          map[string]any{"id": 7, "name": "Alex Rivera"},
+				},
+			}))
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		entries, err := client.FetchTeamTimeEntries(t.Context(), "2026-06-01", "2026-06-30", TeamTimeEntriesFilter{ProjectID: 101})
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := len(entries), 2; got != want {
+			t.Fatalf("len(entries)=%d, want=%d", got, want)
+		}
+		if got, want := entries[0].BillableRate, 160.0; got != want {
+			t.Errorf("billable rate=%f, want=%f", got, want)
+		}
+		if got, want := entries[1].BillableRate, 0.0; got != want {
+			t.Errorf("null billable rate=%f, want=%f", got, want)
+		}
+	})
+
+	t.Run("given a client filter when FetchTeamTimeEntries called then requests client_id without user_id", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if got, want := r.URL.Query().Get("client_id"), "11"; got != want {
+				t.Errorf("client_id query param=%s, want=%s", got, want)
+			}
+			if got, want := r.URL.Query().Has("project_id"), false; got != want {
+				t.Errorf("project_id present=%t, want=%t", got, want)
+			}
+			if got, want := r.URL.Query().Has("user_id"), false; got != want {
+				t.Errorf("user_id present=%t, want=%t", got, want)
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(teamEntriesResponse(nil))
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		entries, err := client.FetchTeamTimeEntries(t.Context(), "2026-06-01", "2026-06-30", TeamTimeEntriesFilter{ClientID: 11})
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := len(entries), 0; got != want {
+			t.Errorf("len(entries)=%d, want=%d", got, want)
+		}
+	})
+
+	t.Run("given a paginated response when FetchTeamTimeEntries called then fetches all pages", func(t *testing.T) {
+		requestCount := 0
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requestCount++
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			if r.URL.Query().Get("page") == "2" {
+				json.NewEncoder(w).Encode(teamEntriesResponse([]map[string]any{
+					{"id": 2, "spent_date": "2026-06-16", "hours": 2.0, "user": map[string]any{"id": 8, "name": "Sam Chen"}},
+				}))
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]any{
+				"time_entries": []map[string]any{
+					{"id": 1, "spent_date": "2026-06-15", "hours": 1.0, "user": map[string]any{"id": 7, "name": "Alex Rivera"}},
+				},
+				"per_page":      1,
+				"total_pages":   2,
+				"total_entries": 2,
+				"page":          1,
+				"next_page":     2,
+			})
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		entries, err := client.FetchTeamTimeEntries(t.Context(), "2026-06-01", "2026-06-30", TeamTimeEntriesFilter{ProjectID: 101})
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := len(entries), 2; got != want {
+			t.Errorf("len(entries)=%d, want=%d", got, want)
+		}
+		if got, want := requestCount, 2; got != want {
+			t.Errorf("request count=%d, want=%d", got, want)
+		}
+	})
+
+	t.Run("given an error response when FetchTeamTimeEntries called then surfaces the API message", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			json.NewEncoder(w).Encode(map[string]string{"message": "insufficient permissions"})
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		_, err := client.FetchTeamTimeEntries(t.Context(), "2026-06-01", "2026-06-30", TeamTimeEntriesFilter{ProjectID: 101})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err.Error(), "insufficient permissions"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
+		}
+	})
+}

@@ -53,6 +53,14 @@ var demoUser = harvest.User{
 	Email:     "demo@example.com",
 }
 
+// Teammates whose entries only show up in team-wide views (e.g. `invoice`);
+// the authenticated demo user is entryUserSelf.
+var (
+	entryUserSelf = harvest.TimeEntryUser{ID: 1, Name: "Demo User"}
+	entryUserAlex = harvest.TimeEntryUser{ID: 2, Name: "Alex Rivera"}
+	entryUserSam  = harvest.TimeEntryUser{ID: 3, Name: "Sam Chen"}
+)
+
 var demoProjects = []harvest.Project{
 	{ID: 101, Name: "Website Redesign", Client: harvest.ProjectClient{ID: 11, Name: "Acme Corp"}},
 	{ID: 102, Name: "Mobile App", Client: harvest.ProjectClient{ID: 12, Name: "Globex"}},
@@ -60,39 +68,47 @@ var demoProjects = []harvest.Project{
 }
 
 var demoTaskAssignments = []harvest.TaskAssignment{
-	{ID: 301, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 201, Name: "Design"}, IsActive: true, Billable: true},
-	{ID: 302, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true},
+	{ID: 301, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 201, Name: "Design"}, IsActive: true, Billable: true, HourlyRate: 150},
+	{ID: 302, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true, HourlyRate: 160},
 	{ID: 303, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 203, Name: "Meetings"}, IsActive: true, Billable: false},
-	{ID: 304, Project: harvest.TaskAssignmentProject{ID: 102, Name: "Mobile App"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true},
-	{ID: 305, Project: harvest.TaskAssignmentProject{ID: 102, Name: "Mobile App"}, Task: harvest.TaskAssignmentTask{ID: 204, Name: "QA"}, IsActive: true, Billable: true},
-	{ID: 306, Project: harvest.TaskAssignmentProject{ID: 103, Name: "Maintenance Retainer"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true},
+	{ID: 304, Project: harvest.TaskAssignmentProject{ID: 102, Name: "Mobile App"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true, HourlyRate: 160},
+	{ID: 305, Project: harvest.TaskAssignmentProject{ID: 102, Name: "Mobile App"}, Task: harvest.TaskAssignmentTask{ID: 204, Name: "QA"}, IsActive: true, Billable: true, HourlyRate: 120},
+	{ID: 306, Project: harvest.TaskAssignmentProject{ID: 103, Name: "Maintenance Retainer"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true, HourlyRate: 160},
 	{ID: 307, Project: harvest.TaskAssignmentProject{ID: 103, Name: "Maintenance Retainer"}, Task: harvest.TaskAssignmentTask{ID: 203, Name: "Meetings"}, IsActive: true, Billable: false},
 }
 
 // seedEntries builds fixture time entries for today and the two days before,
-// so date navigation in the TUI has data to show.
+// so date navigation in the TUI has data to show. Teammate entries make
+// team-wide views (e.g. `invoice`) show more than the authenticated user.
 func seedEntries(today time.Time) []harvest.TimeEntry {
 	day := func(offset int) string { return today.AddDate(0, 0, offset).Format(dateFormat) }
-	entry := func(id int, date string, hours float64, notes string, running bool, projectID, taskID int) harvest.TimeEntry {
+	entry := func(id int, user harvest.TimeEntryUser, date string, hours float64, notes string, running bool, projectID, taskID int) harvest.TimeEntry {
 		e := harvest.TimeEntry{
 			ID:        id,
 			SpentDate: date,
 			Hours:     hours,
 			Notes:     notes,
 			IsRunning: running,
+			User:      user,
 		}
 		fillNames(&e, projectID, taskID)
 		return e
 	}
 	return []harvest.TimeEntry{
-		entry(1001, day(0), 0.5, "Sprint planning", false, 101, 203),
-		entry(1002, day(0), 2.25, "Homepage hero and nav implementation", false, 101, 202),
-		entry(1003, day(0), 1.0, "Push notification spike", true, 102, 202),
-		entry(1004, day(-1), 1.5, "Design review feedback", false, 101, 201),
-		entry(1005, day(-1), 3.0, "Onboarding flow screens", false, 102, 202),
-		entry(1006, day(-1), 0.75, "Dependency upgrades", false, 103, 202),
-		entry(1007, day(-2), 2.0, "Release regression pass", false, 102, 204),
-		entry(1008, day(-2), 1.25, "Quarterly roadmap sync", false, 103, 203),
+		entry(1001, entryUserSelf, day(0), 0.5, "Sprint planning", false, 101, 203),
+		entry(1002, entryUserSelf, day(0), 2.25, "Homepage hero and nav implementation", false, 101, 202),
+		entry(1003, entryUserSelf, day(0), 1.0, "Push notification spike", true, 102, 202),
+		entry(1004, entryUserSelf, day(-1), 1.5, "Design review feedback", false, 101, 201),
+		entry(1005, entryUserSelf, day(-1), 3.0, "Onboarding flow screens", false, 102, 202),
+		entry(1006, entryUserSelf, day(-1), 0.75, "Dependency upgrades", false, 103, 202),
+		entry(1007, entryUserSelf, day(-2), 2.0, "Release regression pass", false, 102, 204),
+		entry(1008, entryUserSelf, day(-2), 1.25, "Quarterly roadmap sync", false, 103, 203),
+		entry(1101, entryUserAlex, day(0), 3.0, "Checkout flow API integration", false, 101, 202),
+		entry(1102, entryUserAlex, day(-1), 2.5, "Component library audit", false, 101, 201),
+		entry(1103, entryUserAlex, day(-1), 1.0, "Sprint planning", false, 101, 203),
+		entry(1104, entryUserAlex, day(-2), 4.0, "Offline sync engine", false, 102, 202),
+		entry(1105, entryUserSam, day(0), 2.0, "Style guide illustrations", false, 101, 201),
+		entry(1106, entryUserSam, day(-2), 1.5, "Cron job hardening", false, 103, 202),
 	}
 }
 
@@ -109,19 +125,23 @@ func fillNames(e *harvest.TimeEntry, projectID, taskID int) bool {
 	if project == nil {
 		return false
 	}
-	var taskName string
-	for _, ta := range demoTaskAssignments {
+	var task *harvest.TaskAssignment
+	for i, ta := range demoTaskAssignments {
 		if ta.Project.ID == projectID && ta.Task.ID == taskID {
-			taskName = ta.Task.Name
+			task = &demoTaskAssignments[i]
 			break
 		}
 	}
-	if taskName == "" {
+	if task == nil {
 		return false
 	}
 	e.Project = harvest.TimeEntryProject{ID: project.ID, Name: project.Name}
 	e.Client = harvest.TimeEntryClient{ID: project.Client.ID, Name: project.Client.Name}
-	e.Task = harvest.TimeEntryTask{ID: taskID, Name: taskName}
+	e.Task = harvest.TimeEntryTask{ID: taskID, Name: task.Task.Name}
+	e.IsBillable = task.Billable
+	if task.Billable {
+		e.BillableRate = task.HourlyRate
+	}
 	return true
 }
 
@@ -150,16 +170,27 @@ func (s *server) handleTaskAssignments(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) handleListEntries(w http.ResponseWriter, r *http.Request) {
-	from := r.URL.Query().Get("from")
-	to := r.URL.Query().Get("to")
+	q := r.URL.Query()
+	from := q.Get("from")
+	to := q.Get("to")
+	// Optional integer filters; zero means "not filtered".
+	userID, _ := strconv.Atoi(q.Get("user_id"))
+	projectID, _ := strconv.Atoi(q.Get("project_id"))
+	clientID, _ := strconv.Atoi(q.Get("client_id"))
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	matched := []harvest.TimeEntry{}
 	for _, e := range s.entries {
-		if (from == "" || e.SpentDate >= from) && (to == "" || e.SpentDate <= to) {
-			matched = append(matched, e)
+		switch {
+		case from != "" && e.SpentDate < from,
+			to != "" && e.SpentDate > to,
+			userID != 0 && e.User.ID != userID,
+			projectID != 0 && e.Project.ID != projectID,
+			clientID != 0 && e.Client.ID != clientID:
+			continue
 		}
+		matched = append(matched, e)
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"time_entries": matched,
@@ -181,13 +212,15 @@ func (s *server) handleCreateEntry(w http.ResponseWriter, r *http.Request) {
 		SpentDate: req.SpentDate,
 		Hours:     req.Hours,
 		Notes:     req.Notes,
-	}
-	if req.IsBillable != nil {
-		entry.IsBillable = *req.IsBillable
+		User:      entryUserSelf,
 	}
 	if !fillNames(&entry, req.ProjectID, req.TaskID) {
 		writeJSON(w, http.StatusUnprocessableEntity, map[string]string{"message": "unknown project or task"})
 		return
+	}
+	// An explicit billable flag overrides the task assignment's default.
+	if req.IsBillable != nil {
+		entry.IsBillable = *req.IsBillable
 	}
 	s.nextID++
 	s.entries = append(s.entries, entry)

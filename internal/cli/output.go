@@ -103,6 +103,38 @@ func renderEntrySummaries(w io.Writer, summaries []entrySummary) error {
 	return tw.Flush()
 }
 
+// formatMoney renders a dollar amount with two decimals (e.g. 375 -> $375.00).
+func formatMoney(amount float64) string {
+	return fmt.Sprintf("$%.2f", amount)
+}
+
+// renderInvoice writes per-person invoice summaries as JSON or a table with
+// one row per task, a per-person total, and a grand total.
+func renderInvoice(w io.Writer, summaries []invoicePersonSummary) error {
+	if outputJSON {
+		return renderJSON(w, summaries)
+	}
+	if len(summaries) == 0 {
+		_, err := fmt.Fprintln(w, "(no time entries)")
+		return err
+	}
+	tw := newTabWriter(w)
+	fmt.Fprintln(tw, "PERSON\tTASK\tHOURS\tAMOUNT")
+	var totalHours, totalAmount float64
+	for _, s := range summaries {
+		person := s.Person
+		for _, ts := range s.Tasks {
+			fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", person, ts.Task, formatHours(ts.Hours), formatMoney(ts.Amount))
+			person = ""
+		}
+		fmt.Fprintf(tw, "\t(total)\t%s\t%s\n", formatHours(s.Hours), formatMoney(s.Amount))
+		totalHours += s.Hours
+		totalAmount += s.Amount
+	}
+	fmt.Fprintf(tw, "TOTAL\t\t%s\t%s\n", formatHours(totalHours), formatMoney(totalAmount))
+	return tw.Flush()
+}
+
 // renderEntry writes a single time entry as JSON or a key/value table.
 func renderEntry(w io.Writer, e *harvest.TimeEntry) error {
 	if outputJSON {

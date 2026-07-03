@@ -219,8 +219,15 @@ harvest entries stop              # stop a running timer
 harvest entries edit              # edit an existing entry
 harvest entries delete            # delete an entry
 harvest projects                  # list projects and their tasks
+harvest invoice --month 2026-06 --project "Website Redesign"   # a month's hours per person
+harvest invoice --client "Acme Corp" --billable-only           # current month, billable hours only
 harvest me                        # show the authenticated user
 ```
+
+`invoice` groups a month's hours by person and task for one project or client
+(by ID or name, and shell completion suggests the names), with billable dollar
+amounts per line item. Seeing other people's hours requires a Harvest admin or
+manager account; regular members only see their own entries.
 
 Every command accepts `--json` to output results as JSON instead of a table, which makes the CLI easy to script with tools like `jq`:
 

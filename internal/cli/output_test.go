@@ -94,6 +94,32 @@ func TestRenderGolden(t *testing.T) {
 		checkGolden(t, "projects_table", buf.String())
 	})
 
+	t.Run("given invoice summaries when rendered as a table then output matches the golden file", func(t *testing.T) {
+		summaries := []invoicePersonSummary{
+			{
+				Person: "Alex Rivera",
+				Hours:  6.5,
+				Amount: 855,
+				Tasks: []invoiceTaskSummary{
+					{Task: "Design", Hours: 2.5, Amount: 375},
+					{Task: "Development", Hours: 3, Amount: 480},
+					{Task: "Meetings", Hours: 1},
+				},
+			},
+			{
+				Person: "Sam Chen",
+				Hours:  2,
+				Amount: 300,
+				Tasks:  []invoiceTaskSummary{{Task: "Design", Hours: 2, Amount: 300}},
+			},
+		}
+		var buf bytes.Buffer
+		if err := renderInvoice(&buf, summaries); err != nil {
+			t.Fatalf("render: %v", err)
+		}
+		checkGolden(t, "invoice_table", buf.String())
+	})
+
 	t.Run("given a user when rendered as a table then output matches the golden file", func(t *testing.T) {
 		user := harvest.User{ID: 1, FirstName: "Demo", LastName: "User", Email: "demo@example.com"}
 		var buf bytes.Buffer

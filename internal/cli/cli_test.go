@@ -369,6 +369,206 @@ func TestEntriesDeleteCommand(t *testing.T) {
 	})
 }
 
+func TestInvoiceCommand(t *testing.T) {
+	t.Run("given a project name when invoiced then groups the month's hours by person", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "invoice", "--month", "2026-06", "--project", "Website Redesign")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		// Alex: 2.5 Design @150 + 3.0 Development @160 + 1.0 Meetings @0;
+		// grand total 12.75 hours / $1740.
+		for _, want := range []string{"Alex Rivera", "Demo User", "Sam Chen", "6:30", "12:45", "$855.00", "$1740.00"} {
+			if got := out; !strings.Contains(got, want) {
+				t.Errorf("output=%q, want substring %q", got, want)
+			}
+		}
+		// Entries for other projects stay out of the invoice.
+		if got, want := out, "QA"; strings.Contains(got, want) {
+			t.Errorf("output=%q, must not contain other project's task %q", got, want)
+		}
+	})
+
+	t.Run("given a project ID when invoiced then matches the project name form", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		byName, err := runCLI(t, "invoice", "--month", "2026-06", "--project", "Website Redesign")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		byID, err := runCLI(t, "invoice", "--month", "2026-06", "--project", "101")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := byID, byName; got != want {
+			t.Errorf("output by ID=%q, want same as by name=%q", got, want)
+		}
+	})
+
+	t.Run("given a client name when invoiced then includes all of the client's projects", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "invoice", "--month", "2026-06", "--client", "Globex")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		// Demo User: 4.0 Development @160 + 2.0 QA @120; Alex: 4.0 Development;
+		// grand total 10.0 hours / $1520.
+		for _, want := range []string{"Alex Rivera", "Demo User", "QA", "10:00", "$1520.00"} {
+			if got := out; !strings.Contains(got, want) {
+				t.Errorf("output=%q, want substring %q", got, want)
+			}
+		}
+		if got, want := out, "Sam Chen"; strings.Contains(got, want) {
+			t.Errorf("output=%q, must not contain %q who logged no Globex time", got, want)
+		}
+	})
+
+	t.Run("given the billable-only flag when invoiced then non-billable hours are excluded", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "invoice", "--month", "2026-06", "--project", "Website Redesign", "--billable-only")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		// Meetings entries are non-billable: grand total drops from 12.75 to 11.25.
+		if got, want := out, "11:15"; !strings.Contains(got, want) {
+			t.Errorf("output=%q, want substring %q", got, want)
+		}
+		if got, want := out, "Meetings"; strings.Contains(got, want) {
+			t.Errorf("output=%q, must not contain non-billable task %q", got, want)
+		}
+	})
+
+	t.Run("given the json flag when invoiced then emits person summaries as JSON", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "invoice", "--month", "2026-06", "--project", "Website Redesign", "--json")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		var summaries []invoicePersonSummary
+		if err := json.Unmarshal([]byte(out), &summaries); err != nil {
+			t.Fatalf("unmarshal: %v\noutput: %s", err, out)
+		}
+		if got, want := len(summaries), 3; got != want {
+			t.Fatalf("len(summaries)=%d, want=%d", got, want)
+		}
+		if got, want := summaries[0].Person, "Alex Rivera"; got != want {
+			t.Errorf("first person=%s, want=%s", got, want)
+		}
+		if got, want := summaries[0].Hours, 6.5; got != want {
+			t.Errorf("first person hours=%f, want=%f", got, want)
+		}
+		if got, want := summaries[0].Amount, 855.0; got != want {
+			t.Errorf("first person amount=%f, want=%f", got, want)
+		}
+	})
+
+	t.Run("given an unknown project name when invoiced then returns a lookup error", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		_, err := runCLI(t, "invoice", "--month", "2026-06", "--project", "Nonexistent")
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err.Error(), "no project matching"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
+		}
+	})
+
+	t.Run("given a malformed month when invoiced then returns a format error", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		_, err := runCLI(t, "invoice", "--month", "bogus", "--project", "101")
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if got, want := err.Error(), "expected YYYY-MM"; !strings.Contains(got, want) {
+			t.Errorf("error=%q, want substring %q", got, want)
+		}
+	})
+
+	t.Run("given both project and client flags when invoiced then returns a usage error", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		_, err := runCLI(t, "invoice", "--month", "2026-06", "--project", "101", "--client", "11")
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+
+	t.Run("given neither project nor client flag when invoiced then returns a usage error", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		_, err := runCLI(t, "invoice", "--month", "2026-06")
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+}
+
+func TestInvoiceFlagCompletion(t *testing.T) {
+	t.Run("given projects when completing --project then suggests project names without file completion", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "__complete", "invoice", "--project", "")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		for _, want := range []string{"Website Redesign", "Mobile App", "Maintenance Retainer", ":4"} {
+			if got := out; !strings.Contains(got, want) {
+				t.Errorf("output=%q, want substring %q", got, want)
+			}
+		}
+	})
+
+	t.Run("given a prefix when completing --project then only matching names are suggested", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "__complete", "invoice", "--project", "web")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := out, "Website Redesign"; !strings.Contains(got, want) {
+			t.Errorf("output=%q, want substring %q", got, want)
+		}
+		if got, want := out, "Mobile App"; strings.Contains(got, want) {
+			t.Errorf("output=%q, must not contain non-matching %q", got, want)
+		}
+	})
+
+	t.Run("given clients when completing --client then suggests each client name once", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "__complete", "invoice", "--client", "")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		for _, want := range []string{"Acme Corp", "Globex", "Initech"} {
+			if got := out; !strings.Contains(got, want) {
+				t.Errorf("output=%q, want substring %q", got, want)
+			}
+		}
+		if got, want := strings.Count(out, "Globex"), 1; got != want {
+			t.Errorf("Globex suggested %d times, want %d", got, want)
+		}
+	})
+
+	t.Run("given no credentials when completing --project then suggests nothing", func(t *testing.T) {
+		keyring.MockInit()
+
+		out, err := runCLI(t, "__complete", "invoice", "--project", "")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := out, "Website Redesign"; strings.Contains(got, want) {
+			t.Errorf("output=%q, must not contain %q without credentials", got, want)
+		}
+	})
+}
+
 func TestAuthCommands(t *testing.T) {
 	t.Run("given valid flag credentials when login runs then validates and stores them", func(t *testing.T) {
 		keyring.MockInit()

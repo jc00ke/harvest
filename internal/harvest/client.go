@@ -61,11 +61,12 @@ type TaskAssignmentTask struct {
 
 // TaskAssignment represents a task assignment from the Harvest API.
 type TaskAssignment struct {
-	ID       int                   `json:"id"`
-	Project  TaskAssignmentProject `json:"project"`
-	Task     TaskAssignmentTask    `json:"task"`
-	IsActive bool                  `json:"is_active"`
-	Billable bool                  `json:"billable"`
+	ID         int                   `json:"id"`
+	Project    TaskAssignmentProject `json:"project"`
+	Task       TaskAssignmentTask    `json:"task"`
+	IsActive   bool                  `json:"is_active"`
+	Billable   bool                  `json:"billable"`
+	HourlyRate float64               `json:"hourly_rate"`
 }
 
 // taskAssignmentsResponse represents the paginated response from GET /v2/task_assignments.
@@ -76,6 +77,12 @@ type taskAssignmentsResponse struct {
 	TotalEntries    int              `json:"total_entries"`
 	Page            int              `json:"page"`
 	NextPage        *int             `json:"next_page"`
+}
+
+// TimeEntryUser represents user info within a time entry.
+type TimeEntryUser struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // TimeEntryClient represents client info within a time entry.
@@ -98,16 +105,20 @@ type TimeEntryTask struct {
 
 // TimeEntry represents a time entry from the Harvest API.
 type TimeEntry struct {
-	ID         int              `json:"id"`
-	SpentDate  string           `json:"spent_date"`
-	Hours      float64          `json:"hours"`
-	Notes      string           `json:"notes"`
-	IsRunning  bool             `json:"is_running"`
-	IsLocked   bool             `json:"is_locked"`
-	IsBillable bool             `json:"billable"`
-	Client     TimeEntryClient  `json:"client"`
-	Project    TimeEntryProject `json:"project"`
-	Task       TimeEntryTask    `json:"task"`
+	ID         int     `json:"id"`
+	SpentDate  string  `json:"spent_date"`
+	Hours      float64 `json:"hours"`
+	Notes      string  `json:"notes"`
+	IsRunning  bool    `json:"is_running"`
+	IsLocked   bool    `json:"is_locked"`
+	IsBillable bool    `json:"billable"`
+	// BillableRate is the hourly rate in the account's currency; the API
+	// sends null for non-billable entries, which decodes as zero.
+	BillableRate float64          `json:"billable_rate"`
+	User         TimeEntryUser    `json:"user"`
+	Client       TimeEntryClient  `json:"client"`
+	Project      TimeEntryProject `json:"project"`
+	Task         TimeEntryTask    `json:"task"`
 }
 
 // timeEntriesResponse represents the paginated response from GET /v2/time_entries.
@@ -477,12 +488,44 @@ func (c *Client) FetchTaskAssignments(ctx context.Context) ([]TaskAssignment, er
 // value for both to fetch a single day. Handles pagination automatically.
 // API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
 func (c *Client) FetchTimeEntries(ctx context.Context, from, to string) ([]TimeEntry, error) {
+	// Filter by user_id to only get current user's entries
+	query := fmt.Sprintf("from=%s&to=%s&user_id=%d", from, to, c.userID)
+	return c.fetchTimeEntries(ctx, query)
+}
+
+// TeamTimeEntriesFilter restricts which time entries FetchTeamTimeEntries
+// returns. A zero ProjectID or ClientID means "don't filter by that field".
+type TeamTimeEntriesFilter struct {
+	ProjectID int
+	ClientID  int
+}
+
+// FetchTeamTimeEntries retrieves all users' time entries within the inclusive
+// date range [from, to], optionally filtered by project or client. Unlike
+// FetchTimeEntries it does not filter by the authenticated user, so it returns
+// other people's entries — but only when the token belongs to an admin or a
+// project manager with permission to see the team's time; otherwise the API
+// silently returns just the caller's own entries.
+// API Reference: https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/
+func (c *Client) FetchTeamTimeEntries(ctx context.Context, from, to string, filter TeamTimeEntriesFilter) ([]TimeEntry, error) {
+	query := fmt.Sprintf("from=%s&to=%s", from, to)
+	if filter.ProjectID != 0 {
+		query += fmt.Sprintf("&project_id=%d", filter.ProjectID)
+	}
+	if filter.ClientID != 0 {
+		query += fmt.Sprintf("&client_id=%d", filter.ClientID)
+	}
+	return c.fetchTimeEntries(ctx, query)
+}
+
+// fetchTimeEntries retrieves every page of GET /v2/time_entries matching the
+// given query string.
+func (c *Client) fetchTimeEntries(ctx context.Context, query string) ([]TimeEntry, error) {
 	var allTimeEntries []TimeEntry
 	page := 1
 
 	for {
-		// Filter by user_id to only get current user's entries
-		path := fmt.Sprintf("/v2/time_entries?from=%s&to=%s&user_id=%d&page=%d", from, to, c.userID, page)
+		path := fmt.Sprintf("/v2/time_entries?%s&page=%d", query, page)
 		resp, err := c.Get(ctx, path)
 		if err != nil {
 			return nil, fmt.Errorf("network request failed: %w", err)
