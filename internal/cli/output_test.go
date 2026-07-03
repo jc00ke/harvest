@@ -99,16 +99,18 @@ func TestRenderGolden(t *testing.T) {
 			{
 				Person: "Alex Rivera",
 				Hours:  6.5,
+				Amount: 855,
 				Tasks: []invoiceTaskSummary{
-					{Task: "Design", Hours: 2.5},
-					{Task: "Development", Hours: 3},
+					{Task: "Design", Hours: 2.5, Amount: 375},
+					{Task: "Development", Hours: 3, Amount: 480},
 					{Task: "Meetings", Hours: 1},
 				},
 			},
 			{
 				Person: "Sam Chen",
 				Hours:  2,
-				Tasks:  []invoiceTaskSummary{{Task: "Design", Hours: 2}},
+				Amount: 300,
+				Tasks:  []invoiceTaskSummary{{Task: "Design", Hours: 2, Amount: 300}},
 			},
 		}
 		var buf bytes.Buffer

@@ -1967,6 +1967,43 @@ func TestFetchTeamTimeEntries(t *testing.T) {
 		}
 	})
 
+	t.Run("given billable rates when FetchTeamTimeEntries called then decodes them treating null as zero", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(teamEntriesResponse([]map[string]any{
+				{
+					"id": 1, "spent_date": "2026-06-15", "hours": 2.0, "billable": true,
+					"billable_rate": 160.0,
+					"user":          map[string]any{"id": 7, "name": "Alex Rivera"},
+				},
+				{
+					"id": 2, "spent_date": "2026-06-15", "hours": 1.0, "billable": false,
+					"billable_rate": nil,
+					"user":          map[string]any{"id": 7, "name": "Alex Rivera"},
+				},
+			}))
+		}))
+		defer server.Close()
+
+		client := NewClient("12345", "test-token")
+		client.SetBaseURL(server.URL)
+
+		entries, err := client.FetchTeamTimeEntries(t.Context(), "2026-06-01", "2026-06-30", TeamTimeEntriesFilter{ProjectID: 101})
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := len(entries), 2; got != want {
+			t.Fatalf("len(entries)=%d, want=%d", got, want)
+		}
+		if got, want := entries[0].BillableRate, 160.0; got != want {
+			t.Errorf("billable rate=%f, want=%f", got, want)
+		}
+		if got, want := entries[1].BillableRate, 0.0; got != want {
+			t.Errorf("null billable rate=%f, want=%f", got, want)
+		}
+	})
+
 	t.Run("given a client filter when FetchTeamTimeEntries called then requests client_id without user_id", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if got, want := r.URL.Query().Get("client_id"), "11"; got != want {

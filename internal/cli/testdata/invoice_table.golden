@@ -1,8 +1,8 @@
-PERSON       TASK         HOURS
-Alex Rivera  Design       2:30
-             Development  3:00
-             Meetings     1:00
-             (total)      6:30
-Sam Chen     Design       2:00
-             (total)      2:00
-TOTAL                     8:30
+PERSON       TASK         HOURS  AMOUNT
+Alex Rivera  Design       2:30   $375.00
+             Development  3:00   $480.00
+             Meetings     1:00   $0.00
+             (total)      6:30   $855.00
+Sam Chen     Design       2:00   $300.00
+             (total)      2:00   $300.00
+TOTAL                     8:30   $1155.00

@@ -61,11 +61,12 @@ type TaskAssignmentTask struct {
 
 // TaskAssignment represents a task assignment from the Harvest API.
 type TaskAssignment struct {
-	ID       int                   `json:"id"`
-	Project  TaskAssignmentProject `json:"project"`
-	Task     TaskAssignmentTask    `json:"task"`
-	IsActive bool                  `json:"is_active"`
-	Billable bool                  `json:"billable"`
+	ID         int                   `json:"id"`
+	Project    TaskAssignmentProject `json:"project"`
+	Task       TaskAssignmentTask    `json:"task"`
+	IsActive   bool                  `json:"is_active"`
+	Billable   bool                  `json:"billable"`
+	HourlyRate float64               `json:"hourly_rate"`
 }
 
 // taskAssignmentsResponse represents the paginated response from GET /v2/task_assignments.
@@ -104,17 +105,20 @@ type TimeEntryTask struct {
 
 // TimeEntry represents a time entry from the Harvest API.
 type TimeEntry struct {
-	ID         int              `json:"id"`
-	SpentDate  string           `json:"spent_date"`
-	Hours      float64          `json:"hours"`
-	Notes      string           `json:"notes"`
-	IsRunning  bool             `json:"is_running"`
-	IsLocked   bool             `json:"is_locked"`
-	IsBillable bool             `json:"billable"`
-	User       TimeEntryUser    `json:"user"`
-	Client     TimeEntryClient  `json:"client"`
-	Project    TimeEntryProject `json:"project"`
-	Task       TimeEntryTask    `json:"task"`
+	ID         int     `json:"id"`
+	SpentDate  string  `json:"spent_date"`
+	Hours      float64 `json:"hours"`
+	Notes      string  `json:"notes"`
+	IsRunning  bool    `json:"is_running"`
+	IsLocked   bool    `json:"is_locked"`
+	IsBillable bool    `json:"billable"`
+	// BillableRate is the hourly rate in the account's currency; the API
+	// sends null for non-billable entries, which decodes as zero.
+	BillableRate float64          `json:"billable_rate"`
+	User         TimeEntryUser    `json:"user"`
+	Client       TimeEntryClient  `json:"client"`
+	Project      TimeEntryProject `json:"project"`
+	Task         TimeEntryTask    `json:"task"`
 }
 
 // timeEntriesResponse represents the paginated response from GET /v2/time_entries.

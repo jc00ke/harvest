@@ -8,21 +8,26 @@ import (
 	"github.com/jc00ke/harvest/internal/harvest"
 )
 
-// invoiceTaskSummary aggregates one person's hours on one task.
+// invoiceTaskSummary aggregates one person's hours on one task. Amount is the
+// billable dollar total (hours × billable rate over the billable entries).
 type invoiceTaskSummary struct {
-	Task  string  `json:"task"`
-	Hours float64 `json:"hours"`
+	Task   string  `json:"task"`
+	Hours  float64 `json:"hours"`
+	Amount float64 `json:"amount"`
 }
 
-// invoicePersonSummary aggregates one person's hours across tasks.
+// invoicePersonSummary aggregates one person's hours and billable amount
+// across tasks.
 type invoicePersonSummary struct {
 	Person string               `json:"person"`
 	Hours  float64              `json:"hours"`
+	Amount float64              `json:"amount"`
 	Tasks  []invoiceTaskSummary `json:"tasks"`
 }
 
-// summarizeInvoice groups entries by person and task, summing hours. People
-// are keyed by user ID and sorted by name; tasks likewise within each person.
+// summarizeInvoice groups entries by person and task, summing hours and
+// billable amounts. People are keyed by user ID and sorted by name; tasks
+// likewise within each person.
 func summarizeInvoice(entries []harvest.TimeEntry) []invoicePersonSummary {
 	type taskKey struct{ userID, taskID int }
 	people := make(map[int]*invoicePersonSummary)
@@ -42,6 +47,12 @@ func summarizeInvoice(entries []harvest.TimeEntry) []invoicePersonSummary {
 			tasks[k] = ts
 		}
 		ts.Hours += e.Hours
+
+		if e.IsBillable {
+			amount := e.Hours * e.BillableRate
+			p.Amount += amount
+			ts.Amount += amount
+		}
 	}
 
 	summaries := make([]invoicePersonSummary, 0, len(people))

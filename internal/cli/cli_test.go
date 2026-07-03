@@ -377,8 +377,9 @@ func TestInvoiceCommand(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
-		// Alex: 2.5 Design + 3.0 Development + 1.0 Meetings; grand total 12.75.
-		for _, want := range []string{"Alex Rivera", "Demo User", "Sam Chen", "6:30", "12:45"} {
+		// Alex: 2.5 Design @150 + 3.0 Development @160 + 1.0 Meetings @0;
+		// grand total 12.75 hours / $1740.
+		for _, want := range []string{"Alex Rivera", "Demo User", "Sam Chen", "6:30", "12:45", "$855.00", "$1740.00"} {
 			if got := out; !strings.Contains(got, want) {
 				t.Errorf("output=%q, want substring %q", got, want)
 			}
@@ -412,8 +413,9 @@ func TestInvoiceCommand(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
-		// Demo User: 4.0 Development + 2.0 QA; Alex: 4.0 Development; grand total 10.0.
-		for _, want := range []string{"Alex Rivera", "Demo User", "QA", "10:00"} {
+		// Demo User: 4.0 Development @160 + 2.0 QA @120; Alex: 4.0 Development;
+		// grand total 10.0 hours / $1520.
+		for _, want := range []string{"Alex Rivera", "Demo User", "QA", "10:00", "$1520.00"} {
 			if got := out; !strings.Contains(got, want) {
 				t.Errorf("output=%q, want substring %q", got, want)
 			}
@@ -458,6 +460,9 @@ func TestInvoiceCommand(t *testing.T) {
 		}
 		if got, want := summaries[0].Hours, 6.5; got != want {
 			t.Errorf("first person hours=%f, want=%f", got, want)
+		}
+		if got, want := summaries[0].Amount, 855.0; got != want {
+			t.Errorf("first person amount=%f, want=%f", got, want)
 		}
 	})
 

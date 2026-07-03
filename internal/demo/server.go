@@ -68,12 +68,12 @@ var demoProjects = []harvest.Project{
 }
 
 var demoTaskAssignments = []harvest.TaskAssignment{
-	{ID: 301, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 201, Name: "Design"}, IsActive: true, Billable: true},
-	{ID: 302, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true},
+	{ID: 301, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 201, Name: "Design"}, IsActive: true, Billable: true, HourlyRate: 150},
+	{ID: 302, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true, HourlyRate: 160},
 	{ID: 303, Project: harvest.TaskAssignmentProject{ID: 101, Name: "Website Redesign"}, Task: harvest.TaskAssignmentTask{ID: 203, Name: "Meetings"}, IsActive: true, Billable: false},
-	{ID: 304, Project: harvest.TaskAssignmentProject{ID: 102, Name: "Mobile App"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true},
-	{ID: 305, Project: harvest.TaskAssignmentProject{ID: 102, Name: "Mobile App"}, Task: harvest.TaskAssignmentTask{ID: 204, Name: "QA"}, IsActive: true, Billable: true},
-	{ID: 306, Project: harvest.TaskAssignmentProject{ID: 103, Name: "Maintenance Retainer"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true},
+	{ID: 304, Project: harvest.TaskAssignmentProject{ID: 102, Name: "Mobile App"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true, HourlyRate: 160},
+	{ID: 305, Project: harvest.TaskAssignmentProject{ID: 102, Name: "Mobile App"}, Task: harvest.TaskAssignmentTask{ID: 204, Name: "QA"}, IsActive: true, Billable: true, HourlyRate: 120},
+	{ID: 306, Project: harvest.TaskAssignmentProject{ID: 103, Name: "Maintenance Retainer"}, Task: harvest.TaskAssignmentTask{ID: 202, Name: "Development"}, IsActive: true, Billable: true, HourlyRate: 160},
 	{ID: 307, Project: harvest.TaskAssignmentProject{ID: 103, Name: "Maintenance Retainer"}, Task: harvest.TaskAssignmentTask{ID: 203, Name: "Meetings"}, IsActive: true, Billable: false},
 }
 
@@ -139,6 +139,9 @@ func fillNames(e *harvest.TimeEntry, projectID, taskID int) bool {
 	e.Client = harvest.TimeEntryClient{ID: project.Client.ID, Name: project.Client.Name}
 	e.Task = harvest.TimeEntryTask{ID: taskID, Name: task.Task.Name}
 	e.IsBillable = task.Billable
+	if task.Billable {
+		e.BillableRate = task.HourlyRate
+	}
 	return true
 }
 
