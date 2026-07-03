@@ -103,6 +103,32 @@ func renderEntrySummaries(w io.Writer, summaries []entrySummary) error {
 	return tw.Flush()
 }
 
+// renderInvoice writes per-person invoice summaries as JSON or a table with
+// one row per task, a per-person total, and a grand total.
+func renderInvoice(w io.Writer, summaries []invoicePersonSummary) error {
+	if outputJSON {
+		return renderJSON(w, summaries)
+	}
+	if len(summaries) == 0 {
+		_, err := fmt.Fprintln(w, "(no time entries)")
+		return err
+	}
+	tw := newTabWriter(w)
+	fmt.Fprintln(tw, "PERSON\tTASK\tHOURS")
+	var total float64
+	for _, s := range summaries {
+		person := s.Person
+		for _, ts := range s.Tasks {
+			fmt.Fprintf(tw, "%s\t%s\t%s\n", person, ts.Task, formatHours(ts.Hours))
+			person = ""
+		}
+		fmt.Fprintf(tw, "\t(total)\t%s\n", formatHours(s.Hours))
+		total += s.Hours
+	}
+	fmt.Fprintf(tw, "TOTAL\t\t%s\n", formatHours(total))
+	return tw.Flush()
+}
+
 // renderEntry writes a single time entry as JSON or a key/value table.
 func renderEntry(w io.Writer, e *harvest.TimeEntry) error {
 	if outputJSON {
