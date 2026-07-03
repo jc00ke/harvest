@@ -509,6 +509,66 @@ func TestInvoiceCommand(t *testing.T) {
 	})
 }
 
+func TestInvoiceFlagCompletion(t *testing.T) {
+	t.Run("given projects when completing --project then suggests project names without file completion", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "__complete", "invoice", "--project", "")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		for _, want := range []string{"Website Redesign", "Mobile App", "Maintenance Retainer", ":4"} {
+			if got := out; !strings.Contains(got, want) {
+				t.Errorf("output=%q, want substring %q", got, want)
+			}
+		}
+	})
+
+	t.Run("given a prefix when completing --project then only matching names are suggested", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "__complete", "invoice", "--project", "web")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := out, "Website Redesign"; !strings.Contains(got, want) {
+			t.Errorf("output=%q, want substring %q", got, want)
+		}
+		if got, want := out, "Mobile App"; strings.Contains(got, want) {
+			t.Errorf("output=%q, must not contain non-matching %q", got, want)
+		}
+	})
+
+	t.Run("given clients when completing --client then suggests each client name once", func(t *testing.T) {
+		setupDemoCLI(t)
+
+		out, err := runCLI(t, "__complete", "invoice", "--client", "")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		for _, want := range []string{"Acme Corp", "Globex", "Initech"} {
+			if got := out; !strings.Contains(got, want) {
+				t.Errorf("output=%q, want substring %q", got, want)
+			}
+		}
+		if got, want := strings.Count(out, "Globex"), 1; got != want {
+			t.Errorf("Globex suggested %d times, want %d", got, want)
+		}
+	})
+
+	t.Run("given no credentials when completing --project then suggests nothing", func(t *testing.T) {
+		keyring.MockInit()
+
+		out, err := runCLI(t, "__complete", "invoice", "--project", "")
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if got, want := out, "Website Redesign"; strings.Contains(got, want) {
+			t.Errorf("output=%q, must not contain %q without credentials", got, want)
+		}
+	})
+}
+
 func TestAuthCommands(t *testing.T) {
 	t.Run("given valid flag credentials when login runs then validates and stores them", func(t *testing.T) {
 		keyring.MockInit()

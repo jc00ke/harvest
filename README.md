@@ -225,7 +225,8 @@ harvest me                        # show the authenticated user
 ```
 
 `invoice` groups a month's hours by person and task for one project or client
-(by ID or name). Seeing other people's hours requires a Harvest admin or
+(by ID or name, and shell completion suggests the names), with billable dollar
+amounts per line item. Seeing other people's hours requires a Harvest admin or
 manager account; regular members only see their own entries.
 
 Every command accepts `--json` to output results as JSON instead of a table, which makes the CLI easy to script with tools like `jq`:

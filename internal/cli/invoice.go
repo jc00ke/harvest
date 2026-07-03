@@ -62,7 +62,56 @@ func newInvoiceCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&billableOnly, "billable-only", false, "Include only billable hours")
 	cmd.MarkFlagsOneRequired("project", "client")
 	cmd.MarkFlagsMutuallyExclusive("project", "client")
+	cmd.RegisterFlagCompletionFunc("project", completeProjectNames)
+	cmd.RegisterFlagCompletionFunc("client", completeClientNames)
 	return cmd
+}
+
+// completeProjectNames suggests active project names for flag completion,
+// with the client name as the description.
+func completeProjectNames(cmd *cobra.Command, _ []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+	projects, err := completionProjects(cmd.Context())
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveError
+	}
+	var completions []cobra.Completion
+	for _, p := range projects {
+		if hasFold(p.Name, toComplete) {
+			completions = append(completions, cobra.CompletionWithDesc(p.Name, p.Client.Name))
+		}
+	}
+	return completions, cobra.ShellCompDirectiveNoFileComp
+}
+
+// completeClientNames suggests each client name once for flag completion.
+func completeClientNames(cmd *cobra.Command, _ []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
+	projects, err := completionProjects(cmd.Context())
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveError
+	}
+	seen := make(map[int]bool)
+	var completions []cobra.Completion
+	for _, p := range projects {
+		if !seen[p.Client.ID] && hasFold(p.Client.Name, toComplete) {
+			seen[p.Client.ID] = true
+			completions = append(completions, p.Client.Name)
+		}
+	}
+	return completions, cobra.ShellCompDirectiveNoFileComp
+}
+
+// completionProjects fetches the projects used to suggest flag values.
+func completionProjects(ctx context.Context) ([]harvest.Project, error) {
+	api, _, err := authedClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return api.FetchProjects(ctx)
+}
+
+// hasFold reports whether s starts with prefix, ignoring case.
+func hasFold(s, prefix string) bool {
+	return len(s) >= len(prefix) && strings.EqualFold(s[:len(prefix)], prefix)
 }
 
 // resolveInvoiceFilter turns the --project or --client flag value into a
