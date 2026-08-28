@@ -114,6 +114,39 @@ func TestRenderEntrySummaries(t *testing.T) {
 		}
 	})
 
+	t.Run("given a summary with notes longer than the entry-table limit when rendered then the notes are not truncated", func(t *testing.T) {
+		long := "standup, code review on the auth refactor, pairing with Dana on the migration, deploy to staging"
+		var buf bytes.Buffer
+		if err := renderEntrySummaries(&buf, []entrySummary{
+			{Client: "Acme", Date: "2026-06-08", Notes: long, Hours: 6.5},
+		}); err != nil {
+			t.Fatalf("render: %v", err)
+		}
+		out := buf.String()
+		if got, want := out, long; !strings.Contains(got, want) {
+			t.Errorf("output missing full notes %q:\n%s", want, got)
+		}
+		if strings.Contains(out, "…") {
+			t.Errorf("output should not contain an ellipsis:\n%s", out)
+		}
+	})
+
+	t.Run("given notes containing a newline when rendered then it stays on one row", func(t *testing.T) {
+		var buf bytes.Buffer
+		if err := renderEntrySummaries(&buf, []entrySummary{
+			{Client: "Acme", Date: "2026-06-08", Notes: "first line\nsecond line", Hours: 1},
+		}); err != nil {
+			t.Fatalf("render: %v", err)
+		}
+		out := buf.String()
+		if got, want := out, "first line second line"; !strings.Contains(got, want) {
+			t.Errorf("output missing flattened notes %q:\n%s", want, got)
+		}
+		if got, want := strings.Count(strings.TrimRight(out, "\n"), "\n"), 1; got != want {
+			t.Errorf("row count lines=%d, want=%d:\n%s", got, want, out)
+		}
+	})
+
 	t.Run("given no summaries when rendered as a table then it prints a placeholder", func(t *testing.T) {
 		var buf bytes.Buffer
 		if err := renderEntrySummaries(&buf, nil); err != nil {

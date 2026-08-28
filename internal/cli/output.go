@@ -42,9 +42,14 @@ func formatHours(hours float64) string {
 	return fmt.Sprintf("%d:%02d", h, m)
 }
 
+// flatten collapses newlines to spaces so a value stays on one table row.
+func flatten(s string) string {
+	return strings.ReplaceAll(s, "\n", " ")
+}
+
 // truncate clips s to max runes and appends "…" if truncated.
 func truncate(s string, max int) string {
-	s = strings.ReplaceAll(s, "\n", " ")
+	s = flatten(s)
 	r := []rune(s)
 	if len(r) <= max {
 		return s
@@ -93,11 +98,14 @@ func renderEntrySummaries(w io.Writer, summaries []entrySummary) error {
 	tw := newTabWriter(w)
 	fmt.Fprintln(tw, "CLIENT\tDATE\tHOURS\tNOTES")
 	for _, s := range summaries {
+		// Notes are the last column and aggregate every entry in the group,
+		// so they print in full and let the terminal wrap rather than being
+		// clipped like the per-entry table's NOTES column.
 		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n",
 			s.Client,
 			s.Date,
 			formatHours(s.Hours),
-			truncate(s.Notes, 60),
+			flatten(s.Notes),
 		)
 	}
 	return tw.Flush()
