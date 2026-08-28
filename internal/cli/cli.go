@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/jc00ke/harvest/internal/buildinfo"
 	"github.com/jc00ke/harvest/internal/config"
 	"github.com/jc00ke/harvest/internal/harvest"
 	"github.com/spf13/cobra"
@@ -27,7 +28,12 @@ func NewRootCommand() *cobra.Command {
 		Long:          "harvest is a CLI for managing Harvest time entries, projects, and tasks.\nRun `harvest -ui` to launch the interactive TUI instead.",
 		SilenceUsage:  true,
 		SilenceErrors: false,
+		Version:       buildinfo.String(),
 	}
+
+	// Cobra's default template prefixes the version with "harvest version ",
+	// which buildinfo.String already spells out.
+	root.SetVersionTemplate("{{.Version}}\n")
 
 	root.PersistentFlags().BoolVar(&outputJSON, "json", false, "Output results as JSON instead of a table")
 

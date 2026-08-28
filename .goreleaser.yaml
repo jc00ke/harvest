@@ -9,6 +9,13 @@ builds:
     binary: harvest
     env:
       - CGO_ENABLED=0
+    # Stamp the version reported by `harvest --version`. Without these the
+    # binary falls back to the VCS metadata the toolchain embeds.
+    ldflags:
+      - -s -w
+      - -X github.com/jc00ke/harvest/internal/buildinfo.Version={{ .Version }}
+      - -X github.com/jc00ke/harvest/internal/buildinfo.Commit={{ .FullCommit }}
+      - -X github.com/jc00ke/harvest/internal/buildinfo.Date={{ .Date }}
     goos:
       - darwin
       - linux
