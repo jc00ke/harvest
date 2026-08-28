@@ -309,30 +309,30 @@ harvest -ui --demo
 
 #### Navigation
 
-| Key | Action |
-|-----|--------|
-| `↑` / `k` | Move selection up |
+| Key       | Action              |
+| --------- | ------------------- |
+| `↑` / `k` | Move selection up   |
 | `↓` / `j` | Move selection down |
-| `←` / `h` | Previous day |
-| `→` / `l` | Next day |
-| `t` | Jump to today |
+| `←` / `h` | Previous day        |
+| `→` / `l` | Next day            |
+| `t`       | Jump to today       |
 
 #### Time Entry Actions
 
-| Key | Action |
-|-----|--------|
-| `n` | Create new time entry |
-| `e` | Edit selected entry |
-| `d` | Delete selected entry |
+| Key | Action                             |
+| --- | ---------------------------------- |
+| `n` | Create new time entry              |
+| `e` | Edit selected entry                |
+| `d` | Delete selected entry              |
 | `s` | Start/stop timer on selected entry |
 
 #### General
 
-| Key | Action |
-|-----|--------|
-| `?` | Toggle help overlay |
-| `q` / `Esc` | Quit / go back |
-| `Ctrl+C` | Force quit |
+| Key         | Action              |
+| ----------- | ------------------- |
+| `?`         | Toggle help overlay |
+| `q` / `Esc` | Quit / go back      |
+| `Ctrl+C`    | Force quit          |
 
 ## Development
 
