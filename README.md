@@ -11,7 +11,7 @@ brew install --cask jc00ke/tap/harvest-cli
 ```
 
 Homebrew installs shell completions automatically. To upgrade later, run
-`brew upgrade --cask harvest-cli`. The installed command is still `harvest`.
+`brew upgrade harvest-cli`. The installed command is still `harvest`.
 
 ### Download a Release Binary
 
@@ -130,7 +130,7 @@ The binary will be created at `bin/harvest`.
 
 ## Updating
 
-- **Homebrew:** `brew upgrade --cask harvest`.
+- **Homebrew:** `brew upgrade --cask harvest-cli`.
 - **Release binary:** Download the latest version from the [Releases page](https://github.com/jc00ke/harvest/releases) and replace the existing binary.
 - **Go install:** Run `go install github.com/jc00ke/harvest/cmd/harvest@latest` again.
 - **Build from source:** Pull the latest changes and rebuild:
