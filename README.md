@@ -209,25 +209,66 @@ You'll be prompted for your Account ID and Access Token. Use `harvest auth statu
 
 ### CLI
 
+#### Credentials
+
+```bash
+harvest auth login                # prompt for Account ID and Access Token, store in the keyring
+harvest auth status               # show which account the stored credentials belong to
+harvest auth logout               # remove the stored credentials
+harvest me                        # show the authenticated user
+harvest --version                 # print the installed version
+```
+
+#### Listing time entries
+
 ```bash
 harvest entries list              # list time entries for a date (defaults to today)
+harvest entries list --date 2026-06-08          # a single specific day
 harvest entries list --date 2026-06-08 --week   # a 7-day window starting at --date
 harvest entries list --summary    # aggregate the week per client per day
-harvest entries create            # log time
-harvest entries start             # start the timer on an existing entry
-harvest entries stop              # stop a running timer
-harvest entries edit              # edit an existing entry
-harvest entries delete            # delete an entry
-harvest projects                  # list projects and their tasks
+```
+
+`--summary` implies `--week`; without `--date` its window starts on the Monday
+of the current week.
+
+#### Creating and changing entries
+
+`create` requires `--project` and `--task` IDs, which `harvest projects list`
+prints. The other flags are optional: `--date` defaults to today, and omitting
+`--billable` leaves the entry on the project's default.
+
+```bash
+harvest entries create --project 12345 --task 678 --hours 1.5 --notes "Sprint planning"
+harvest entries create --project 12345 --task 678 --hours 2 --date 2026-06-08 --billable
+```
+
+`edit`, `delete`, `start`, and `stop` each take the entry ID as a positional
+argument; `harvest entries list` prints the IDs. `edit` updates only the flags
+you pass and leaves the rest of the entry untouched.
+
+```bash
+harvest entries edit 987654 --hours 3.25            # change just the hours
+harvest entries edit 987654 --notes "Revised scope" --billable=false
+harvest entries edit 987654 --project 12345 --task 678 --date 2026-06-09
+harvest entries start 987654      # start the timer on an existing entry
+harvest entries stop 987654       # stop a running timer
+harvest entries delete 987654     # delete an entry
+```
+
+#### Projects and invoicing
+
+```bash
+harvest projects list             # list active projects with their task IDs
 harvest invoice --month 2026-06 --project "Website Redesign"   # a month's hours per person
+harvest invoice --project 12345                                # by project ID instead of name
 harvest invoice --client "Acme Corp" --billable-only           # current month, billable hours only
-harvest me                        # show the authenticated user
 ```
 
 `invoice` groups a month's hours by person and task for one project or client
 (by ID or name, and shell completion suggests the names), with billable dollar
-amounts per line item. Seeing other people's hours requires a Harvest admin or
-manager account; regular members only see their own entries.
+amounts per line item. Exactly one of `--project` or `--client` is required, and
+`--month` defaults to the current month. Seeing other people's hours requires a
+Harvest admin or manager account; regular members only see their own entries.
 
 Every command accepts `--json` to output results as JSON instead of a table, which makes the CLI easy to script with tools like `jq`:
 
