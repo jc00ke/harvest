@@ -124,3 +124,14 @@ git tag -s "$version" -m "$version"
 git push origin "$version"
 echo "Pushed $version. Watch the release at https://github.com/jc00ke/harvest/actions"
 '''
+
+[tasks."deps:list_updates"]
+run = "go list -u -m all"
+
+[tasks."deps:update"]
+run = "go get -u ./..."
+depends_post = ["vuln", "deps:clean"]
+
+[tasks."deps:clean"]
+run = "go mod tidy"
+depends_post = ["test"]
